@@ -1,0 +1,62 @@
+If you're interviewing someone for an expert-level role that requires advanced knowledge of Git, you'll want to ask questions that assess their deep understanding of version control, branching strategies, Git internals, and troubleshooting skills. Here are some advanced Git interview questions:
+
+1. Explain Git's internal data structure. How does Git store data?
+Follow-up: How do objects like commits, blobs, trees, and tags interact in the Git object model?
+Purpose: Tests understanding of Git's internal data structures (blobs, trees, commits) and how they are stored (in the .git/objects directory).
+2. What is the difference between git merge and git rebase? When would you prefer one over the other?
+Follow-up: Can you describe the effects of git rebase --interactive on commit history and how to use it for squashing commits?
+Purpose: Evaluates knowledge of merging strategies, their implications on commit history, and how rebasing works at a low level.
+3. What are Git hooks, and how can they be used to enforce policies in a team environment?
+Follow-up: How would you set up a pre-push hook to prevent pushing code that doesn’t pass a specific linting check?
+Purpose: Tests knowledge of Git hooks and their practical use for automating workflows and enforcing team policies.
+4. What is the difference between git pull and git fetch?
+Follow-up: What happens when you run git pull and there are conflicts? How would you resolve them using Git's tools?
+Purpose: Assesses familiarity with the fetch vs. pull commands and conflict resolution strategies.
+5. Explain the concept of "detached HEAD" state. How can you recover from it?
+Follow-up: How would you go about creating a new branch while in detached HEAD state, and what are the consequences of not doing so?
+Purpose: Tests understanding of the detached HEAD state and how to safely recover or commit changes from it.
+6. What is the purpose of the .gitignore file? Can you explain the difference between global and local ignore rules?
+Follow-up: How would you handle a scenario where a file has already been committed but needs to be ignored in future commits?
+Purpose: Evaluates understanding of .gitignore and how to manage ignored files in an ongoing project.
+7. What are submodules in Git, and how do they work?
+Follow-up: How would you update a submodule to a specific commit and push those changes?
+Purpose: Assesses knowledge of Git submodules, their purpose, and management best practices.
+8. Can you explain Git's "stash" feature? What are its limitations and potential pitfalls?
+Follow-up: What is the difference between git stash pop and git stash apply? When would you use each?
+Purpose: Tests knowledge of the git stash command and its use in temporarily saving changes without committing.
+9. How would you go about troubleshooting a merge conflict in a complex Git repository with multiple branches?
+Follow-up: Describe a specific Git conflict resolution strategy that works well in a team environment, especially when working with long-lived feature branches.
+Purpose: Tests conflict resolution techniques and the ability to work with Git in a team environment.
+10. What is the purpose of git reflog? How can it help in recovering lost commits or identifying bad merges?
+Follow-up: Can you walk through a real-world scenario where git reflog helped you recover a lost commit or resolve a mistake?
+Purpose: Assesses knowledge of reflog as a recovery tool and its application in troubleshooting.
+11. What are the best practices for managing a large Git repository with many contributors?
+Follow-up: How would you handle a situation where your Git repository is growing too large and becoming slow to clone or fetch?
+Purpose: Evaluates experience with scaling Git usage and managing large repositories.
+12. How would you implement a strategy for Git branching and merging in a large team or open-source project?
+Follow-up: Can you explain a specific Git workflow (e.g., GitFlow, GitHub Flow, trunk-based development) and its benefits and drawbacks?
+Purpose: Tests familiarity with advanced Git workflows and branching strategies.
+13. What is the significance of git bisect? Can you describe a scenario where you used it to identify a bug?
+Follow-up: What is the performance impact of using git bisect on a large repository, and how can you optimize it?
+Purpose: Tests the practical application of git bisect for debugging and understanding its performance considerations.
+14. Explain the concept of "fast-forward merge." What are the implications of a non-fast-forward merge?
+Follow-up: What happens when you try to push a branch to a remote repository with a non-fast-forward update? How would you resolve it?
+Purpose: Tests knowledge of merge types and how to handle them in collaborative environments.
+15. How does Git handle large binary files and what strategies would you use to manage them in a repository?
+Follow-up: Have you used Git LFS (Large File Storage)? How does it work, and when would it be a good idea to implement it?
+Purpose: Evaluates knowledge of handling binary files and using Git LFS for large files.
+16. Can you explain the difference between git reset, git checkout, and git revert?
+Follow-up: How would you use git reset --hard in a scenario where you want to undo the last commit, and what precautions should be taken?
+Purpose: Tests understanding of the difference between reset, checkout, and revert, as well as their impact on the working directory and commit history.
+17. What is git cherry-pick, and how does it differ from git merge?
+Follow-up: Can you give an example of when you would use git cherry-pick to incorporate specific commits from another branch into your current branch?
+Purpose: Assesses knowledge of the cherry-pick command and its use cases, particularly when dealing with isolated commits.
+18. How does Git's garbage collection (git gc) work, and when should it be run?
+Follow-up: What are the potential consequences of not running git gc regularly in a large repository?
+Purpose: Tests understanding of Git's internal housekeeping mechanism and its impact on performance.
+19. Explain how you would handle a situation where you need to rewrite Git history in a shared repository (e.g., using git rebase --interactive). How do you manage the risks of rewriting history?
+Follow-up: How would you inform a team and ensure they don’t run into issues when you push rewritten history to a shared branch?
+Purpose: Tests knowledge of rewriting history in shared environments and managing its risks in a collaborative workflow.
+20. Can you explain Git's "hook" mechanism? How would you implement an automatic check for code formatting before a commit is allowed?
+Follow-up: How can you ensure that these hooks are enforced across multiple developers' environments?
+Purpose: Tests knowledge of Git hooks and how they can be used to enforce best practices in a development team.
