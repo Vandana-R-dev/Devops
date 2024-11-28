@@ -1,0 +1,157 @@
+# 1. What is the difference between EC2 and Lambda? When would you use each?
+Answer:
+EC2 (Elastic Compute Cloud):
+Provides virtual servers.
+You manage the OS, scaling, and configuration.
+Use Case: Applications requiring control over the OS, persistent workloads, or custom software installations.
+Lambda:
+Serverless compute where you run code without managing servers.
+Automatically scales based on demand.
+Use Case: Event-driven or lightweight tasks, such as API backends or scheduled jobs.
+# 2. How does Auto Scaling work in AWS, and how would you configure it?
+Answer:
+
+Auto Scaling ensures that your application scales up or down based on predefined policies.
+Steps:
+Create a launch template or configuration defining the instance type and AMI.
+Set up an Auto Scaling group with a minimum, maximum, and desired number of instances.
+Define scaling policies:
+Dynamic Scaling: Adjusts capacity based on metrics (e.g., CPU utilization).
+Scheduled Scaling: Adjusts capacity at specific times.
+Example Scaling Policy:
+
+yaml
+Copy code
+- Add 1 instance if CPU utilization > 70% for 5 minutes.
+- Remove 1 instance if CPU utilization < 30% for 5 minutes.
+# 3. What is an S3 bucket, and what are some key features of S3?
+Answer:
+S3 (Simple Storage Service):
+Object storage with virtually unlimited capacity.
+Data is stored in buckets.
+Key Features:
+Storage Classes: Standard, Infrequent Access (IA), Glacier, Intelligent Tiering.
+Versioning: Keeps multiple versions of objects.
+Lifecycle Management: Automates transitioning objects between storage classes.
+Encryption: Server-side encryption (SSE) and client-side encryption.
+Cross-Region Replication (CRR): Automatically replicates data across regions.
+# 4. How do you secure an S3 bucket?
+Answer:
+Steps to Secure an S3 Bucket:
+Use IAM Policies to control access.
+Apply Bucket Policies for fine-grained control.
+Enable Block Public Access:
+Prevent public access to the bucket or objects.
+Use S3 Access Points for large-scale access control.
+Enable Server-Side Encryption (SSE):
+SSE-S3, SSE-KMS, or SSE-C.
+Use MFA Delete to prevent accidental deletions.
+# 5. Explain the difference between Load Balancers in AWS.
+Answer:
+Types of Load Balancers:
+Application Load Balancer (ALB):
+Operates at Layer 7 (HTTP/HTTPS).
+Supports content-based routing and host-based routing.
+Use Case: Web applications, microservices.
+Network Load Balancer (NLB):
+Operates at Layer 4 (TCP/UDP).
+Handles high-throughput, low-latency traffic.
+Use Case: Real-time gaming, IoT, or financial apps.
+Classic Load Balancer (CLB):
+Operates at both Layer 4 and Layer 7.
+Legacy option; replaced by ALB and NLB.
+# 6. How does AWS CloudFront work, and what are its key benefits?
+Answer:
+CloudFront is a Content Delivery Network (CDN) service that distributes content globally through edge locations.
+Benefits:
+Reduces latency by caching content closer to users.
+Integrates with S3, EC2, and Lambda@Edge.
+Provides HTTPS support and custom domain names.
+Supports caching policies and Geo-restrictions.
+# 7. What is the difference between RDS and DynamoDB?
+Answer:
+RDS (Relational Database Service):
+Managed relational database (SQL).
+Supports MySQL, PostgreSQL, SQL Server, Oracle, etc.
+Use Case: Applications requiring complex queries or transactions.
+DynamoDB:
+NoSQL database with low-latency performance.
+Fully serverless and scales automatically.
+Use Case: Key-value or document-based workloads, IoT data, or session management.
+# 8. Explain AWS VPC and its components.
+Answer:
+VPC (Virtual Private Cloud): A logically isolated network in AWS.
+Key Components:
+Subnets: Public and private subnets within a VPC.
+Route Tables: Direct network traffic.
+Internet Gateway (IGW): Enables internet access for public subnets.
+NAT Gateway: Allows private subnet instances to access the internet without being exposed.
+Security Groups: Acts as a virtual firewall for instances.
+Network ACLs: Controls traffic at the subnet level.
+# 9. How do you handle disaster recovery in AWS?
+Answer:
+Disaster Recovery Strategies:
+Backup and Restore:
+Regularly back up data using S3 or EBS snapshots.
+Pilot Light:
+Maintain a minimal version of your environment and scale during a disaster.
+Warm Standby:
+A scaled-down version of your infrastructure running at all times.
+a
+Multi-Region Active-Active:
+Run workloads in multiple regions for high availability.
+Use Route 53 for DNS failover.
+# 10. How does AWS CloudWatch help monitor applications?
+Answer:
+CloudWatch collects and monitors metrics and logs for AWS resources.
+Key Features:
+Monitor metrics like CPU utilization, memory, and disk usage.
+Set up alarms to trigger notifications or actions (e.g., scaling).
+Log aggregation and analysis using CloudWatch Logs.
+Create custom dashboards for visualization.
+# 11. How do you implement CI/CD in AWS?
+Answer:
+Tools:
+CodeCommit: Git-based version control.
+CodeBuild: Build and test source code.
+CodeDeploy: Automate application deployments.
+CodePipeline: Orchestrate the CI/CD workflow.
+Workflow:
+Developers push code to CodeCommit.
+CodePipeline triggers a build in CodeBuild.
+CodeDeploy deploys the build to EC2, ECS, or Lambda.
+# 12. How does AWS IAM work, and what are its best practices?
+Answer:
+IAM (Identity and Access Management):
+Manages permissions for AWS resources.
+Components:
+Users, Groups, Roles, Policies.
+Best Practices:
+Grant least privilege.
+Use IAM Roles instead of access keys for EC2 instances.
+Enable MFA for all users.
+Use policy conditions to restrict access based on IP or time.
+# 13. What is AWS Lambda, and how is it priced?
+Answer:
+AWS Lambda:
+Serverless compute service that runs code in response to events.
+Pricing:
+Request Count: First 1M requests are free; $0.20 per 1M requests after.
+Duration: Charged based on the execution time (rounded to the nearest millisecond) and allocated memory.
+# 14. Explain EBS vs. EFS.
+Answer:
+EBS (Elastic Block Store):
+Block storage for a single EC2 instance.
+Use Case: Persistent storage for databases or OS disks.
+EFS (Elastic File System):
+Shared file storage that scales automatically.
+Supports multiple EC2 instances.
+Use Case: Shared storage for web apps or big data workloads.
+# 15. How would you troubleshoot high latency in your application hosted on AWS?
+**Answer:
+Steps:
+Check EC2 instance metrics in CloudWatch (CPU, memory, network).
+Analyze Load Balancer latency metrics.
+Investigate RDS or DynamoDB query performance.
+Use VPC Flow Logs and CloudWatch Logs for network issues.
+Implement CloudFront for caching static assets.
