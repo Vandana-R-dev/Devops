@@ -1,4 +1,4 @@
-# How do you use Ansible Vault? Explain its purpose.
+ How do you use Ansible Vault? Explain its purpose.
 Ansible Vault encrypts sensitive data like passwords or API keys. Use ansible-vault create file.yml to create an encrypted file, and decrypt it with ansible-vault decrypt file.yml. Add --ask-vault-pass when running playbooks with Vault files.
 
 ansible-vault encrypt <file>

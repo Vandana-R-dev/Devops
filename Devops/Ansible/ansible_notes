@@ -1,0 +1,1096 @@
+ANSIBLE
+In ansible we have control node and manage nodes. Assume control node is one virtual machine manage nodes also virtual machines if we get task to install java on manage nodes you have to write a playbook on control nodes no need to go to each server and write it.As a prerequist manage ode should have python.
+Ansible is a popular open-source automation tool designed for simplifying IT tasks, including configuration management, application deployment, and orchestration. Here’s why Ansible is needed:
+Orchestration in Ansible involves managing the interactions and dependencies between different systems, services, or tasks to achieve a coordinated outcome. Unlike simple provisioning, orchestration focuses on automating complex workflows where multiple components need to work together seamlessly.
+________________________________________
+1. Automation of Repetitive Tasks
+•	Problem: Managing IT infrastructure often involves repetitive tasks like configuring servers, deploying applications, and ensuring consistency across environments.
+•	Solution: Ansible automates these tasks, reducing manual effort and the risk of human error.
+________________________________________
+2. Agentless Architecture
+•	Problem: Many automation tools require agents or software to be installed on the managed nodes, adding complexity and overhead.
+•	Solution: Ansible is agentless. It uses SSH (or WinRM for Windows) to communicate with systems, making it lightweight and easy to deploy.
+________________________________________
+3. Scalability
+•	Problem: As infrastructure grows, managing a large number of systems manually or with scripts becomes unmanageable.
+•	Solution: Ansible scales seamlessly from managing a few servers to thousands, enabling consistent and efficient operations.
+________________________________________
+4. Infrastructure as Code (IaC)
+•	Problem: Manual configuration is error-prone and doesn't support version control or auditing.
+•	Solution: Ansible uses simple, human-readable YAML files to define configurations, making it easy to version, audit, and share infrastructure definitions.
+________________________________________
+5. Cross-Platform Support
+•	Problem: Organizations often use a mix of operating systems and environments, such as Linux, Windows, cloud platforms, and containers.
+•	Solution: Ansible supports diverse platforms and environments, allowing centralized management from a single tool.
+________________________________________
+6. Rapid Deployment
+•	Problem: Setting up environments and deploying applications manually can take hours or days.
+•	Solution: Ansible automates deployments, enabling rapid and consistent rollouts across environments.
+________________________________________
+7. Security and Compliance
+•	Problem: Maintaining consistent security policies and compliance across multiple systems is challenging.
+•	Solution: Ansible can enforce security baselines, perform regular audits, and ensure compliance with industry standards.
+________________________________________
+8. Simplified Learning Curve
+•	Problem: Complex tools require significant time to learn and use effectively.
+•	Solution: Ansible’s declarative, YAML-based syntax is simple and intuitive, requiring minimal training compared to other automation tools.
+________________________________________
+Use Cases for Ansible
+•	Configuration management (e.g., setting up servers with required software).
+•	Application deployment (e.g., deploying web apps or databases).
+•	Infrastructure provisioning (e.g., provisioning VMs or cloud resources).
+•	Orchestration (e.g., coordinating multi-tier deployments).
+•	Continuous delivery/continuous integration (CI/CD) pipelines.
+________________________________________
+In short, Ansible helps streamline IT operations, improves efficiency, and enables teams to focus on strategic initiatives instead of repetitive tasks.
+Shell/python/ansible
+Shell only works for linux operation sytems.
+Python maintainance after sometime would be tough if we need to install modules also woul be tough.
+If you want to communicate with api good to go with python ansible don’t have modules for it.
+Ansible passwordless authentication
+Passwordless authentication in Ansible typically refers to the ability to run tasks or playbooks on managed nodes (remote machines) without having to manually enter passwords. This is achieved by using SSH key-based authentication.
+Inventory
+Ansible inventory is a file or collection of sources that tells Ansible which machines (hosts) to manage. It defines groups, individual hosts, and related variables. Here's a simple breakdown of types of inventories and their explanation:
+1. Static Inventory
+A static inventory is a file (e.g., hosts or inventory.ini) where you manually list hosts and groups.
+•	Format: INI or YAML
+•	Use Case: Small, stable environments.
+Example (INI format):
+ini
+Copy code
+[web_servers]
+server1.example.com
+server2.example.com
+
+[db_servers]
+db1.example.com ansible_user=dbadmin ansible_port=2222
+•	web_servers and db_servers are groups.
+•	Hosts can have variables like ansible_user (SSH user) and ansible_port.
+Example (YAML format):
+yaml
+Copy code
+all:
+  children:
+    web_servers:
+      hosts:
+        server1.example.com:
+        server2.example.com:
+    db_servers:
+      hosts:
+        db1.example.com:
+          ansible_user: dbadmin
+          ansible_port: 2222
+________________________________________
+2. Dynamic Inventory
+A dynamic inventory is generated on the fly using a script, plugin, or cloud service API (e.g., AWS, Azure).
+•	Use Case: Large or dynamic environments like cloud or container systems.
+Example: AWS EC2 Inventory Plugin
+•	Ansible queries AWS to get all EC2 instances dynamically.
+•	No manual listing of hosts is required.
+To use dynamic inventory:
+bash
+Copy code
+ansible-inventory -i aws_ec2.yaml --graph
+
+Adhoc Commands:(one line command to complete task)
+If you want to do simple tasks like installing apache server, installing or unistalling softwares.
+Ansible ad-hoc commands allow you to run tasks without writing a full playbook. These commands are quick, one-off operations for performing actions on managed nodes.
+Here’s an overview and some examples of Ansible ad-hoc commands.
+________________________________________
+General Syntax
+bash
+Copy code
+ansible <group_or_host> -m <module> -a "<arguments>" -i <inventory>"
+•	<group_or_host>: Group name or hostname from the inventory.
+•	-m: Specifies the module to use.
+•	-a: Arguments for the module.
+•	-i: Path to the inventory file (optional if default is used).
+Share
+VR
+You said:
+difference between playbook and adhoc commands
+
+The difference between playbooks and ad-hoc commands in Ansible primarily comes down to their scope, purpose, and how they are executed. Here's a breakdown:
+1. Ad-hoc Commands
+•	Purpose: Used for quick, one-off tasks that don’t need to be saved or reused.
+•	Execution: Run directly from the command line using the ansible command.
+•	Scope: Typically used for simple tasks, such as checking system status, copying a file, or restarting a service.
+•	State: Do not maintain state, as they are not declarative.
+•	Syntax Example:
+bash
+Copy code
+ansible all -m ping
+ansible webservers -a "systemctl restart apache2"
+ansible all -m copy -a "src=/tmp/test.txt dest=/home/user/"
+o	-m specifies the module to use.
+o	-a passes arguments to the module.
+•	When to Use:
+o	Quick tasks, troubleshooting, or testing.
+o	When you don’t need to save or repeat the task later.
+________________________________________
+2. Playbooks
+•	Purpose: Used for automating more complex, multi-step processes or workflows.
+•	Execution: Run using the ansible-playbook command.
+•	Scope: A YAML file that defines multiple tasks, configurations, or workflows in a structured and reusable way.
+•	State: Declarative and idempotent (ensures the desired system state).
+•	Syntax Example:
+yaml
+Copy code
+---
+- name: Install Apache and start service
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: Install Apache
+      apt:
+        name: apache2
+        state: present
+    - name: Start Apache service
+      service:
+        name: apache2
+        state: started
+o	Playbooks are written in YAML format.
+o	They define tasks, loops, variables, conditionals, and handlers.
+•	When to Use:
+o	Automating repetitive tasks.
+o	Managing configuration across multiple servers.
+o	Creating a repeatable and reusable infrastructure setup.
+Examples of Ansible Ad-hoc Commands
+1. Ping Hosts
+Checks connectivity to the managed nodes.
+bash
+Copy code
+ansible all -m ping
+•	all: Target all hosts in the inventory.
+•	ping: Ansible module for connectivity testing.
+________________________________________
+2. Gather Facts
+Retrieve information (facts) about a host.
+bash
+Copy code
+ansible all -m setup
+________________________________________
+3. Run Shell Commands
+Execute a command on remote nodes.
+bash
+Copy code
+ansible webservers -m shell -a "uptime"
+•	webservers: Target hosts in the "webservers" group.
+•	shell: Run commands through the shell.
+•	uptime: Command to run.
+________________________________________
+4. Copy Files
+Copy a file from control node to a remote host.
+bash
+Copy code
+ansible all -m copy -a "src=/path/to/file dest=/tmp/file mode=644"
+________________________________________
+5. Create or Remove a Directory
+bash
+Copy code
+# Create directory
+ansible all -m file -a "path=/tmp/testdir state=directory mode=0755"
+
+# Remove directory
+ansible all -m file -a "path=/tmp/testdir state=absent"
+________________________________________
+6. Manage Packages
+Install a Package
+bash
+Copy code
+ansible all -m yum -a "name=httpd state=present" # For CentOS/RHEL
+ansible all -m apt -a "name=nginx state=present" # For Ubuntu/Debian
+Remove a Package
+bash
+Copy code
+ansible all -m apt -a "name=nginx state=absent"
+________________________________________
+7. Restart Services
+bash
+Copy code
+ansible all -m service -a "name=nginx state=restarted"
+________________________________________
+8. Change Permissions (Chmod)
+bash
+Copy code
+ansible all -m file -a "path=/tmp/testfile mode=0644"
+________________________________________
+9. Add or Remove Users
+Add a User
+bash
+Copy code
+ansible all -m user -a "name=devops state=present"
+Remove a User
+bash
+Copy code
+ansible all -m user -a "name=devops state=absent"
+________________________________________
+10. Check Free Disk Space
+bash
+Copy code
+ansible all -m command -a "df -h"
+________________________________________
+11. Manage Cron Jobs
+Add a cron job:
+bash
+Copy code
+ansible all -m cron -a "name='cleanup_tmp' minute='0' hour='3' job='rm -rf /tmp/*'"
+________________________________________
+12. Reboot a Server
+bash
+Copy code
+ansible all -m reboot
+________________________________________
+Specifying Inventory File
+By default, Ansible uses /etc/ansible/hosts for inventory. To use a custom inventory file:
+bash
+Copy code
+ansible all -i /path/to/inventory -m ping
+________________________________________
+Key Modules for Ad-hoc Commands
+•	ping: Test connection.
+•	command: Run a command (no shell features).
+•	shell: Run a command through a shell.
+•	copy: Copy files.
+•	file: Manage file attributes (directories, files, symlinks).
+•	user: Manage users.
+•	service: Manage services.
+•	apt/yum: Package management.
+•	reboot: Reboot systems.
+•	cron: Manage cron jobs.
+•	setup: Gather facts about a host.
+________________________________________
+Examples with Specific Targets
+•	Target specific hosts:
+bash
+Copy code
+ansible webservers -m shell -a "df -h"
+•	Using pattern matching:
+bash
+Copy code
+ansible 'web*' -m ping
+•	Run as a specific user:
+bash
+Copy code
+ansible all -b -m yum -a "name=vim state=present"
+o	-b: Run the command with privilege escalation (e.g., sudo).
+________________________________________
+Useful Tips
+•	Add -o to display output in a single line:
+bash
+Copy code
+ansible all -m ping -o
+•	Use --limit to restrict execution:
+bash
+Copy code
+ansible all --limit "host1,host2" -m ping
+________________________________________
+Ad-hoc commands are great for quick tasks, but for more complex automation, playbooks are preferred.
+4o
+You said:
+gather facts ansible
+ChatGPT said:
+ChatGPT
+In Ansible, gathering facts refers to collecting system information about managed nodes. This information, known as facts, includes details like the OS, IP address, CPU, memory, disk space, and other system-specific attributes.
+________________________________________
+How to Gather Facts
+1. Default Fact Gathering in Playbooks
+By default, Ansible gathers facts at the start of any playbook execution using the setup module.
+Example Playbook:
+yaml
+Copy code
+- hosts: all
+  tasks:
+    - name: Display gathered facts
+      debug:
+        var: ansible_facts
+________________________________________
+2. Ad-hoc Command for Gathering Facts
+You can use the setup module with an ad-hoc command to gather and display facts.
+bash
+Copy code
+ansible all -m setup
+•	all: Targets all hosts in the inventory.
+•	setup: The module used to gather system facts.
+________________________________________
+3. Filtering Specific Facts
+If you only need specific facts, you can filter them using the filter parameter.
+Example: Filter facts related to "memory"
+bash
+Copy code
+ansible all -m setup -a 'filter=ansible_memory*'
+Example: Get network-related facts
+bash
+Copy code
+ansible all -m setup -a 'filter=ansible_default_ipv4'
+________________________________________
+4. Disabling Fact Gathering
+If you don’t need facts gathered automatically in a playbook, you can disable it to save time.
+yaml
+Copy code
+- hosts: all
+  gather_facts: no
+  tasks:
+    - name: Task without facts
+      debug:
+        msg: "Facts gathering is disabled."
+________________________________________
+5. Using Gathered Facts
+Once gathered, the facts are stored in the ansible_facts dictionary and can be used in your playbooks.
+Example: Display the IP Address
+yaml
+Copy code
+- hosts: all
+  tasks:
+    - name: Display the default IPv4 address
+      debug:
+        msg: "The IP address is {{ ansible_facts['default_ipv4']['address'] }}"
+Example: Use CPU cores for decision-making
+yaml
+Copy code
+- hosts: all
+  tasks:
+    - name: Install software if 4 or more CPUs exist
+      debug:
+        msg: "This host has {{ ansible_processor_cores }} CPU cores."
+      when: ansible_processor_cores >= 4
+________________________________________
+List of Useful Facts
+Here are some commonly used facts:
+Fact Key	Description
+ansible_os_family	OS family (e.g., RedHat, Debian).
+ansible_distribution	OS distribution name (e.g., Ubuntu).
+ansible_memtotal_mb	Total memory (RAM) in MB.
+ansible_processor_cores	Number of CPU cores.
+ansible_default_ipv4	Default IPv4 network details.
+ansible_architecture	System architecture (e.g., x86_64).
+ansible_kernel	Kernel version.
+ansible_hostname	System hostname.
+ansible_date_time	Date and time details.
+(Devops engineer work with adhoc commands to managing files, deleting files, updating files)
+________________________________________
+Key Differences Summary:
+Aspect	Ad-hoc Commands	Playbooks
+Use Case	One-off, quick tasks	Complex, repeatable, multi-step tasks
+Execution	Directly from CLI (ansible command)	Using YAML files (ansible-playbook)
+Idempotence	No guarantee (depends on the task)	Yes, always ensures desired state
+State Management	Imperative	Declarative and consistent
+Complexity	Simple	Structured and supports advanced logic
+Reusability	No	Yes, reusable workflows
+Syntax	Inline arguments or simple flags	YAML-based structured tasks
+YAML		
+Yaml is much more human readable.
+Understanding YAML
+YAML (YAML Ain't Markup Language) is a human-readable data serialization format that is commonly used for configuration files and data exchange between languages with different data structures.
+YAML Syntax
+Strings, Numbers and Booleans:
+string: Hello, World!
+number: 42
+boolean: true
+List
+fruits:
+  - Apple
+  - Orange
+  - Banana
+Dictionary
+person:
+  name: John Doe
+  age: 30
+  city: New York
+List of dictionaries
+YAML allows nesting of lists and dictionaries to represent more complex data.
+family:
+  parents:
+    - name: Jane
+      age: 50
+    - name: John
+      age: 52
+  children:
+    - name: Jimmy
+      age: 22
+    - name: Jenny
+      age: 20
+
+Ansible modules are small programs used to perform specific tasks within an Ansible playbook or ad-hoc commands. Modules are the building blocks of Ansible automation, allowing you to configure systems, deploy applications, and orchestrate IT tasks.
+Types of Ansible Modules
+Ansible modules are categorized based on their functions. Here are some of the key categories:
+________________________________________
+1. Core Modules
+These are the primary modules shipped with Ansible by default.
+Examples:
+•	ping - Checks if the target host is reachable.
+•	setup - Gathers facts about the target system.
+•	command - Executes a command on the target system.
+•	shell - Runs shell commands on remote hosts.
+•	copy - Copies files to a remote machine.
+________________________________________
+2. System Modules
+These modules manage system-level tasks.
+Examples:
+•	user - Manages user accounts.
+•	group - Manages groups on the system.
+•	service - Controls system services (e.g., start, stop, restart).
+•	cron - Manages cron jobs.
+________________________________________
+3. Files Modules
+Modules used for file and directory operations.
+Examples:
+•	file - Sets permissions, creates, or removes files/directories.
+•	copy - Copies files from local to remote systems.
+•	fetch - Fetches files from remote systems to local systems.
+•	template - Deploys Jinja2 templates.
+________________________________________
+4. Package Management Modules
+Manages software packages on various systems.
+Examples:
+•	apt - Manages Debian-based package installation.
+•	yum - Manages packages on RedHat-based systems.
+•	dnf - For managing packages on newer RedHat systems.
+•	pip - Manages Python packages.
+•	gem - Installs Ruby gems.
+________________________________________
+5. Cloud Modules
+These modules are used to manage cloud infrastructure.
+Examples:
+•	aws_ec2 - Manages AWS EC2 instances.
+•	azure_rm - Manages resources on Microsoft Azure.
+•	gcp_compute - Manages Google Cloud Platform resources.
+•	openstack - Manages OpenStack cloud resources.
+________________________________________
+6. Networking Modules
+Manages network devices and configurations.
+Examples:
+•	ios_config - Configures Cisco IOS devices.
+•	nxos_config - Configures Cisco NX-OS devices.
+•	net_ping - Pings hosts from network devices.
+•	juniper_junos_config - Configures Juniper devices.
+________________________________________
+7. Database Modules
+Manages databases like MySQL, PostgreSQL, etc.
+Examples:
+•	mysql_db - Manages MySQL databases.
+•	postgresql_db - Manages PostgreSQL databases.
+•	mongodb_user - Manages MongoDB users.
+________________________________________
+8. Cloud Automation Modules
+For automating cloud-based deployments and services.
+Examples:
+•	k8s - Manages Kubernetes resources.
+•	docker_container - Manages Docker containers.
+•	terraform - Executes Terraform automation.
+________________________________________
+9. Utilities Modules
+General-purpose modules for diverse tasks.
+Examples:
+•	wait_for - Waits for conditions like ports or files to become available.
+•	uri - Interacts with HTTP/HTTPS endpoints.
+•	set_fact - Defines custom variables dynamically.
+________________________________________
+Custom Modules
+If Ansible's built-in modules don't suit your needs, you can create custom modules in Python, Bash, or any scripting language.
+Example of a Simple Custom Module
+Custom module example in Python:
+python
+Copy code
+#!/usr/bin/python
+import json
+print(json.dumps({
+    "changed": True,
+    "msg": "Hello from custom module!"
+}))
+Place it in the library/ directory of your playbook to make it usable.
+________________________________________
+How to Use Ansible Modules
+Example Playbook:
+yaml
+Copy code
+- name: Example playbook using modules
+  hosts: all
+  tasks:
+    - name: Ping the hosts
+      ansible.builtin.ping:
+
+    - name: Install Apache package
+      ansible.builtin.yum:
+        name: httpd
+        state: present
+
+    - name: Start Apache service
+      ansible.builtin.service:
+        name: httpd
+        state: started
+        enabled: true
+________________________________________
+Key Notes:
+1.	Module Arguments - Modules accept specific parameters.
+2.	Idempotency - Ansible modules ensure that running the same playbook multiple times does not cause changes unless required.
+3.	Return Values - Modules return JSON data that can be processed in playbooks.
+
+
+Playbook is usually list of plays.
+In each play we have
+  name:playbook name
+  host:place where u want to run(webserver)
+  remote_user:this can be root or ubutnu
+  tasks:
+   modules===place where actual action takes place
+
+most commonly used modules are:
+**ping-**
+ping module is used for checking up on the remote host, specifically for connectivity to remote host and for checking python on the remote host. It can also be used to check user login and privilages
+
+---
+- name: ping module 
+  hosts: all
+  become: false
+  tasks:
+    - name: test connection
+      ping:
+
+**setup module**
+
+setup module helps us in gathering data about the target nodes like hostname, ip, os etc. This module is automatically called by playbook to gather useful variable about remote host. . All the information is presented in a friendly t JSON format, with all values being preceded with “ansible_”.
+
+ansible host-1 -m setup -u ec2-user
+The output of the above adhoc command will be in the format
+
+
+You can also filter the result by using the filter parameter.
+
+ansible all -m setup -u ec2-user -a 'filter=ansible_os_family'
+
+**yum module**
+
+yum module is used to install different packages/software on Redhat based linux flavours.
+
+---
+- name: Update Package on linux system
+  hosts: all
+  become: yes
+  tasks:
+  - name: Uninstall Apache
+    yum:
+      name: nginx
+      state: absent
+  - name: Install a list of packages with a list variable
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - httpd
+      - httpd-tools
+**apt module**
+
+apt package module is used for managing software on debian based linux os.
+
+---
+- name: Update Package on debian system
+  hosts: all
+  become: yes
+  tasks:
+  - name: Run the equivalent of "apt-get update" as a separate step
+    apt:
+      update_cache: yes
+  - name: Install latest version of "openjdk-6-jdk" 
+    apt:
+      name: openjdk-6-jdk
+      state: latest
+      install_recommends: no
+**package module**
+
+This modules manages packages on a target without specifying a package manager module (lyum, apt, …). It is convenient to use in an heterogeneous environment of machines without having to create a specific task for each package manager. This module acts as a proxy to the underlying package manager module. While all arguments will be passed to the underlying module,
+
+---
+- name: Update Packages on target system
+  hosts: all
+  become: yes
+  tasks:
+  - name: Install ntpdate
+    ansible.builtin.package:
+      name: ntpdate
+      state: present
+   
+  - name: Install the latest version of Apache and MariaDB
+    ansible.builtin.package:
+      name:
+        - httpd
+        - mariadb-server
+      state: latest
+
+**pip module**
+
+Pip module is used for managing python packages on the target system.
+
+---
+- name: Update python packages
+  hosts: all
+  become: yes
+  tasks:
+  - name: Install multi python packages with version specifiers
+    pip:
+      name:
+        - django>1.11.0,<1.12.0
+        - bottle>0.10,<0.20,!=0.11
+  - name: Install specified python requirements
+    pip:
+      requirements: /my_app/requirements.txt
+**npm module**
+
+Npm module is used for managing of node.js packages. This module is not part of ansible-core modules. To use it in a playbook, specify: community.general.npm.
+
+---
+- name: npm module
+  hosts: all
+  tasks:
+  - name: Install "coffee-script" node.js package.
+    community.general.npm:
+      name: coffee-script
+      path: /app/location
+  - name: Install packages based on package.json.
+    community.general.npm:
+      path: /app/location
+
+**raw module**
+
+Raw module is used to executes a low-down and dirty SSH command, It is s useful and should only be done in a few cases. A common case is installing python on a system which doesnot have python. Another is speaking to any devices such as routers that do not have Python installed on it.
+
+In any other case, using shell or command module is much more appropriate, Arguments given to raw are run directly through the configured remote shell.
+
+---
+- name: raw module usage
+  hosts: all
+  become: yes
+  tasks:
+  - name: Bootstrap a host without python2 installed
+    raw: dnf install -y python2 python2-dnf libselinux-python
+  
+  - name: Run a command that uses non-posix shell-isms (in this example /bin/sh doesn't handle redirection and wildcards together but bash does)
+    raw: cat < /tmp/*txt
+    args:
+      executable: /bin/bash
+**command module**
+
+Command module is used to execute commands on a remote node. It is used mostly to run simple Linux commands . The command(s) will not be processed through the shell, so variables like $HOSTNAME and operations like “*”, “<”, “>”, “|”, “;” and “&” will not work. For Windows targets, use the win_command module instead. For windows based target win_command can be used in place of command module.
+
+---
+- name: command module
+  hosts: all
+  tasks:
+  - name: Run command if /path/to/database does not exist (without 'args')
+    command: /usr/bin/make_database.sh db_user db_name creates=/path/to/database
+  - name: Run command if /path/to/database does not exist (with 'args' keyword)
+    ansible.builtin.command: /usr/bin/make_database.sh db_user db_name
+    args:
+      creates: /path/to/database
+**shell module**
+
+Shell module is designed to execute shell commands against the target unix based hosts. Unlike the Ansible command module, Ansible Shell would accept highly complexed commands with pipes, redirection etc, you can also execute shell scripts using this module. This module is designed to work only with Linux based Machines and not Windows, For windows you should use win_powershell module
+
+---
+- name: shell module
+  hosts: all
+  tasks:
+  - name: This command will change the working directory to somedir/ and will only run when somedir/somelog.txt doesn't exist
+    shell: somescript.sh >> somelog.txt
+    args:
+      chdir: somedir/
+      creates: somelog.txt
+  
+  - name: This command will change the working directory to somedir/
+    shell:
+      cmd: ls -l | grep log
+      chdir: somedir/
+  
+  - name: Run a command that uses non-posix shell-isms (in this example /bin/sh doesn't handle redirection and wildcards together but bash does)
+    shell: cat < /tmp/*txt
+    args:
+      executable: /bin/bash
+**script module**
+
+Script module can be used to run a local script on a remote node. When we invoke the shell module and passes a local shell script to it, what it does at the backend is that first it transfers the script to the remote node and than executes it. Two important things to keep in mind about this module is that it does not require python on the remote node and the script is executed through shell. script module is also supported for windows based nodes.
+
+---
+- name: script module
+  hosts: all
+  tasks:
+  -  name: Run a script with arguments (free form)
+     ansible.builtin.script: /some/local/script.sh --some-argument 1234
+   
+  -  name: Run a script with arguments (using 'cmd' parameter)
+     ansible.builtin.script:
+       cmd: /some/local/script.sh --some-argument 1234
+
+**Service Module**
+The service module controls services on remote hosts and can leverage different init systems depending on their availability in a system. This module provides a nice abstraction layer for underlying service manager modules. Here’s an example of restarting the docker service:
+
+- name: Restart docker service
+   ansible.builtin.service:
+     name: docker
+     state: restarted
+
+**File Module**
+The file module handles operations to files, symlinks, and directories. Here’s an example of using this module to create a directory with specific permissions:
+
+- name: Create the directory "/etc/test" if it doesnt exist and set permissions
+  ansible.builtin.file:
+    path: /etc/test
+    state: directory
+    mode: '0750'
+**Copy Module**
+The Ansible copy module copies files to the remote machine and handles file transfers or moves within a remote system. Here’s an example of copying a file to the remote machine with permissions set:
+
+- name: Copy file with owner and permissions
+  ansible.builtin.copy:
+    src: /example_directory/test
+    dest: /target_directory/test
+    owner: joe
+    group: admins
+    mode: '0755'
+
+**Template Module**
+The template module assists us to template files out to target hosts by leveraging the Jinja2 templating language. Here’s an example of using a template file and some set Ansible variables to generate an Nginx configuration file:
+
+- name: Copy and template the Nginx configuration file to the host
+  ansible.builtin.template:
+    src: templates/nginx.conf.j2
+    dest: /etc/nginx/sites-available/default
+
+**Cron Module**
+The cron module manages crontab entries and environment variables entries on remote hosts.
+
+- name: Run daily DB backup script at 00:00
+  ansible.builtin.cron:
+    name: "Run daily DB backup script at 00:00"
+    minute: "0"
+    hour: "0"
+    job: "/usr/local/bin/db_backup_script.sh > /var/log/db_backup_script.sh.log 2>&1"
+
+**DEMO PLAYBOOK**
+ become: true #it runs on root user if i wont give it runs whichever user is configured for ansible in this case we used ubuntu
+ hosts:all means it runs on all inventory files
+---
+- hosts: all
+  become: true 
+  tasks:
+    - name: Install apache httpd
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+        update_cache: yes
+    - name: Copy file with owner and permissions
+      ansible.builtin.copy:
+        src: index.html
+        dest: /var/www/html
+        owner: root
+        group: root
+        mode: '0644'
+
+**Ansible roles:**
+If we have 20 tasks that we should write in playbook it would be tough for readabality so we have roles for organinzing and reusing can be easy to use it.
+creating each folder for each role everytime it would be tough so we have one command that creates all folders at one shot
+synatax: ansible-galaxy role init role-name
+ansible-galaxy role init test
+(it will create readme.md, files, templates, vars, tasks, tests, meta, defaults, handlers)
+After creating roles we can upload to ansible galaxy, github and we can share within organization.
+
+An Ansible role is a reusable, self-contained unit of automation that is used to organize and manage tasks, variables, files, templates, and handlers in a structured way.
+
+Roles help to encapsulate and modularize the logic and configuration needed to manage a particular system or application component.
+
+This modular approach promotes reusability, maintainability, and consistency across different playbooks and environments.
+
+Key Components of an Ansible Role
+Tasks
+The main list of actions that the role performs.
+
+Handlers
+Tasks that are triggered by changes in other tasks, typically used for actions like restarting services.
+
+Files
+Static files that need to be transferred to managed hosts.
+
+Templates(to store dynamic values)
+Jinja2 templates that can be rendered and transferred to managed hosts.
+
+Vars
+Variables that are used within the role.
+
+Defaults(if we wont give anything it will take defaults/main.yml variables)
+Default variables for the role, which can be overridden.
+
+Meta(brief explaiantion)
+Metadata about the role, including dependencies on other roles.
+
+Library
+Custom modules or plugins used within the role.
+
+Module_defaults
+Default module parameters for the role.
+
+Lookup_plugins
+Custom lookup plugins for the role.
+
+Directory Structure of an Ansible Role
+An Ansible role follows a specific directory structure:
+
+<role_name>/
+  ├── defaults/
+  │   └── main.yml
+  ├── files/
+  ├── handlers/
+  │   └── main.yml
+  ├── meta/
+  │   └── main.yml
+  ├── tasks/
+  │   └── main.yml
+  ├── templates/
+  ├── vars/
+      └── main.yml
+Why Use Ansible Roles?
+Modularity
+Roles allow you to break down complex playbooks into smaller, reusable components. Each role handles a specific part of the configuration or setup.
+
+Reusability
+Once created, roles can be reused across different playbooks and projects. This saves time and effort in writing redundant code.
+
+Maintainability
+By organizing related tasks into roles, it becomes easier to manage and maintain the code. Changes can be made in one place and applied consistently wherever the role is used.
+
+Readability
+Roles make playbooks cleaner and easier to read by abstracting away the details into logically named roles.
+
+Collaboration
+Roles facilitate collaboration among team members by allowing them to work on different parts of the infrastructure independently.
+
+Consistency
+Using roles ensures that the same setup and configuration procedures are applied uniformly across multiple environments, reducing the risk of configuration drift.
+
+# ctrl+v for select then d for delete to remove extra space
+in playbook we need to mention roles that we are using such as role-name
+
+ Include Roles in Playbooks: Finally, include the role in your playbook.
+
+# playbook.yml
+---
+- hosts: webservers
+  roles:
+    - role_name(name of role_name that you have used while creating ansible-galaxy)
+
+we can run playbook as normal after including roles also
+ansible-playbook -i inventory.ini first-playbook.yaml
+
+we can login to ansible galaxy with github account
+if you searcg role-namspaces you will get ur github id
+
+to check hidden roles ls ~./ansible/roles
+
+**In Inventory files we will have ip's of managed nodes**
+
+**Execution plan:**
+For example control nodes have multiple tasks so it ll take each task run on all manage node once it completes first task in all amange nodes then it moves to second task.
+If first task fails it wont continue with rest of the tasks it stops there.
+with the help of error handling we can ignore manage node1 even though task1 fails but task2 starts executing from manage node 1 not manage node1 it ignores it.
+
+**Error handling:**
+Error handling in Ansible ensures that playbooks and tasks gracefully manage failures and unexpected scenarios. Ansible provides several mechanisms for error handling, ranging from built-in directives to more advanced techniques. Here’s a comprehensive guide:
+
+1. Basic Error Handling
+ignore_errors: Use this to ignore task failures and proceed with the playbook execution.
+yaml
+Copy code
+- name: Ignore errors
+  command: /bin/false
+  ignore_errors: yes
+2. Failing Explicitly
+fail module: Force a task to fail when specific conditions are met.
+
+yaml
+Copy code
+- name: Explicitly fail if a condition is true
+  fail:
+    msg: "The task has failed because the condition was met."
+  when: some_condition
+assert module: Validate a condition and fail with a custom message if it doesn't meet the requirement.
+
+yaml
+Copy code
+- name: Ensure a condition is met
+  assert:
+    that:
+      - some_variable == "expected_value"
+    fail_msg: "The condition was not met."
+3. Retries and Handlers
+retries and delay: Retry a task multiple times before marking it as failed.
+
+yaml
+Copy code
+- name: Retry task on failure
+  command: /bin/false
+  register: result
+  retries: 3
+  delay: 5
+  until: result.rc == 0
+Handlers: Execute specific actions when a task changes state.
+
+yaml
+Copy code
+- name: Restart service on change
+  service:
+    name: apache2
+    state: restarted
+  notify: Restart Apache
+
+handlers:
+  - name: Restart Apache
+    service:
+      name: apache2
+      state: restarted
+4. Using block, rescue, and always
+block: Group tasks together and define what happens if an error occurs.
+
+rescue: Define tasks to run when a task in the block fails.
+
+always: Tasks that always run regardless of success or failure.
+
+yaml
+Copy code
+- block:
+    - name: Try to execute a command
+      command: /bin/false
+  rescue:
+    - name: Handle the failure
+      debug:
+        msg: "The task failed. Taking corrective actions."
+  always:
+    - name: Cleanup
+      debug:
+        msg: "Cleanup tasks always run."
+5. Conditional Execution with when
+Execute tasks only if specific conditions are met, reducing the chance of errors.
+
+yaml
+Copy code
+- name: Run a task conditionally
+  command: /bin/false
+  when: ansible_os_family == "Debian"
+6. Error Logging and Debugging
+debug module: Log variables or messages to understand what went wrong.
+
+yaml
+Copy code
+- name: Debug output
+  debug:
+    msg: "{{ some_variable }}"
+register: Capture task results and handle them accordingly.
+
+yaml
+Copy code
+- name: Register the result of a task
+  command: /bin/false
+  register: result
+- name: Debug the result
+  debug:
+    var: result
+7. Set max_fail_percentage
+Control the maximum percentage of hosts that can fail before a play is terminated.
+
+yaml
+Copy code
+- hosts: all
+  max_fail_percentage: 20
+  tasks:
+    - name: Example task
+      command: /bin/false
+8. Best Practices
+Use block and rescue for structured error handling.
+Log outputs with debug to trace issues.
+Always validate conditions with assert to prevent unexpected failures.
+Use ignore_errors sparingly to avoid masking genuine issues.
+By employing these techniques, you can create robust, fault-tolerant playbooks that handle errors gracefully.
+
+You said:
+Error handling in ansible with easy explanation 
+ChatGPT said:
+ChatGPT
+Error handling in Ansible ensures your playbook keeps running (or stops gracefully) when something goes wrong. Here's an easy explanation of the main ways to handle errors in Ansible:
+
+1. Ignore Errors
+If you don’t want a task failure to stop your playbook, use ignore_errors: yes. The playbook will move on to the next task even if the current one fails.
+
+yaml
+Copy code
+- name: Ignore if this command fails
+  command: /bin/false
+  ignore_errors: yes
+2. Stop with a Custom Error
+Use the fail module to stop the playbook with a custom message when something is wrong.
+
+yaml
+Copy code
+- name: Stop if a condition is met
+  fail:
+    msg: "Something went wrong!"
+  when: some_condition
+3. Check a Condition
+The assert module checks if a condition is true. If it’s false, the playbook fails with a message.
+
+yaml
+Copy code
+- name: Ensure a variable has the right value
+  assert:
+    that:
+      - my_variable == "expected_value"
+    fail_msg: "The value is not as expected!"
+4. Retry a Task
+If a task might fail temporarily (like waiting for a service), you can retry it.
+
+yaml
+Copy code
+- name: Retry until the command works
+  command: curl http://example.com
+  retries: 3
+  delay: 5
+  register: result
+  until: result.rc == 0
+5. Group Tasks with Error Handling
+You can group tasks using block, and handle errors with rescue (what to do when something fails) or always (tasks that run no matter what).
+
+yaml
+Copy code
+- block:
+    - name: Try to run a task
+      command: /bin/false
+  rescue:
+    - name: Do something if it fails
+      debug:
+        msg: "The task failed. Fixing it now."
+  always:
+    - name: Cleanup, always runs
+      debug:
+        msg: "Cleanup is done."
+6. Debug Information
+Use the debug module to display variables or messages, which helps you understand errors.
+
+yaml
+Copy code
+- name: Show the value of a variable
+  debug:
+    msg: "The value is {{ my_variable }}"
+7. Control Failures Across Multiple Hosts
+Set a limit on how many hosts can fail before the play stops using max_fail_percentage.
+
+yaml
+Copy code
+- hosts: all
+  max_fail_percentage: 20
+  tasks:
+    - name: This task might fail on some hosts
+      command: /bin/false
+Summary
+Use ignore_errors to continue despite failures.
+Use fail or assert to stop with custom messages.
+Retry tasks with retries and delay.
+Handle errors with block, rescue, and always.
+Use debug to log information and understand what went wrong.
+These methods make your playbooks more reliable and easier to troubleshoot!
+ 

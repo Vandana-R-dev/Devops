@@ -7,7 +7,7 @@ Link the strategy to real-world scenarios you've encountered and justify why it 
 
 Example Answer: "In my current and previous roles, we used a combination of Git Flow and GitHub Flow strategies based on project requirements:
 
-Git Flow for Structured Release Projects:
+# Git Flow for Structured Release Projects:
 
 Why? This strategy is ideal for large projects with scheduled release cycles.
 Branches Used:
