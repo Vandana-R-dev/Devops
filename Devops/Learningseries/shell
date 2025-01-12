@@ -1,0 +1,314 @@
+Operating system acts as a bridge between hardware and software.
+
+**Why linux?**
+free
+opensource
+secure
+distributions
+fast
+
+**Difference between UNIX and Linux**
+Feature	UNIX	Linux
+Origin	Developed in the 1970s by AT&T's Bell Labs.	Created in 1991 by Linus Torvalds as a free alternative to UNIX.
+License	Proprietary, requires licensing (e.g., IBM AIX, Solaris).	Open-source and free (GPL License).
+Kernel Type	Monolithic kernel (proprietary).	Monolithic kernel (open-source).
+Cost	Commercial, often expensive.	Free or low-cost distributions.
+Portability	Limited portability (mainly used on specific hardware).	Highly portable across different hardware platforms.
+Distributions	No standard distributions, specific vendors create versions (e.g., HP-UX, AIX, Solaris).	Many distributions (e.g., Ubuntu, CentOS, Red Hat, Debian).
+User Base	Mostly used in enterprise servers, mainframes, and proprietary systems.	Widely used by developers, personal users, servers, and cloud environments.
+Security	High security (due to commercial support and strict standards).	High security (due to open-source nature and rapid updates).
+Development	Closed-source, developed by specific companies.	Open-source, developed by the community.
+Shell	Bourne Shell (sh), Korn Shell (ksh).	Bash Shell (bash), Z Shell (zsh), and others.
+File System	JFS, GPFS, ZFS.	ext2, ext3, ext4, XFS, Btrfs, etc.
+Usage	Mainly used for mission-critical applications in banking, telecom, and government.	Used in various domains, including cloud computing, web servers, personal desktops, and embedded systems.
+Support	Vendor-based support.	Community support and enterprise support (e.g., Red Hat, Canonical).
+Summary
+UNIX is a proprietary, older operating system mainly used in large-scale enterprise systems.
+Linux is an open-source, UNIX-like operating system that is widely adopted due to its flexibility, cost-effectiveness, and community-driven development.
+
+Linux Basics
+1. **Navigation & File Management**
+cd (Change Directory):
+
+Used to navigate between directories.
+Example:
+bash
+Copy code
+cd /home/user/Documents
+Changes the current working directory to /home/user/Documents.
+cd ..(to go to previos one)
+cd ../..(2 times previous back)
+free -g(how much space left)
+nproc(how many cpu left)
+top(manage memory,cpu all together)
+**ls (List):**
+ls-ltr means we can list along with properties like who is owner of it,permissions what type of it and all
+Lists files and directories in the current directory.
+Example:
+bash
+Copy code
+ls
+To list all files (including hidden ones), use:
+bash
+Copy code
+ls -a
+**pwd (Print Working Directory):**
+
+Displays the absolute path of the current directory.
+Example:
+bash
+Copy code
+pwd
+Output: /home/user
+**mkdir (Make Directory):**
+
+Creates a new directory.
+Example:
+bash
+Copy code
+mkdir new_folder
+**touch (Create File):**
+
+Creates a new empty file.
+Example:
+bash
+Copy code
+touch file.txt
+2. **File Operations**
+cp (Copy):
+
+Copy a file or directory.
+Example:
+bash
+Copy code
+cp file1.txt file2.txt
+mv (Move/Rename):
+
+Moves or renames files.
+Example:
+bash
+Copy code
+mv old_name.txt new_name.txt
+rm (Remove):
+
+Deletes files or directories.
+Example:
+bash
+Copy code
+rm file.txt
+cat (Concatenate):
+
+Displays the content of a file.
+Example:
+bash
+Copy code
+cat file.txt
+3. File Permissions
+chmod (Change Mode):
+
+Modifies file permissions.
+Example:
+bash
+Copy code
+chmod +x script.sh
+Adds execute permission to the script.
+chown (Change Owner):
+
+Changes the ownership of a file.
+Example:
+bash
+Copy code
+chown user:group file.txt
+4. Process Management
+ps (Process Status):
+
+Lists running processes.
+Example:
+bash
+Copy code
+ps aux
+kill (Terminate Process):
+
+Sends a signal to a process to terminate.
+Example:
+bash
+Copy code
+kill -9 1234
+top (Task Manager):
+
+Displays a dynamic view of system processes.
+Example:
+bash
+Copy code
+top
+Intermediate Linux Topics
+1. Managing Services
+systemctl (System Control):
+
+Used to control services in modern Linux distributions (e.g., Ubuntu 16.04+).
+Example:
+bash
+Copy code
+systemctl start apache2
+Starts the Apache2 service.
+service (Legacy Service Management):
+
+Used for older systems (e.g., CentOS 7).
+Example:
+bash
+Copy code
+service apache2 restart
+2. Log Management
+Viewing Logs:
+
+Example:
+bash
+Copy code
+tail -f /var/log/syslog
+Continuously displays new log entries in syslog.
+Log Rotation:
+
+Logs can be rotated (archived) using logrotate.
+Example configuration in /etc/logrotate.d/ to archive logs weekly:
+bash
+Copy code
+/var/log/example.log {
+  weekly
+  rotate 4
+  compress
+  notifempty
+}
+3. Cron Jobs (Automating Tasks)
+crontab -e:
+Edit the cron job schedule.
+Example:
+bash
+Copy code
+0 0 * * * /path/to/script.sh
+Runs the script every day at midnight.
+Shell Scripting Basics
+1. Hello World Script
+Create a simple Bash script:
+
+bash
+Copy code
+#!/bin/bash
+echo "Hello, World!"
+Save this as hello.sh and run:
+
+bash
+Copy code
+bash hello.sh
+2. Variables and Input
+Creating and using variables:
+
+bash
+Copy code
+#!/bin/bash
+name="Vandana"
+echo "Hello, $name!"
+Reading user input:
+
+bash
+Copy code
+#!/bin/bash
+echo "Enter your name:"
+read name
+echo "Hello, $name!"
+3. Conditionals (If Statements)
+Basic if statement:
+bash
+Copy code
+#!/bin/bash
+if [ $1 -gt 10 ]; then
+    echo "Number is greater than 10"
+else
+    echo "Number is 10 or less"
+fi
+4. Loops
+For loop:
+
+bash
+Copy code
+#!/bin/bash
+for i in {1..5}; do
+    echo "Looping ... $i"
+done
+While loop:
+
+bash
+Copy code
+#!/bin/bash
+count=1
+while [ $count -le 5 ]; do
+    echo "Counting ... $count"
+    ((count++))
+done
+Advanced Shell Scripting for DevOps
+1. Functions
+Defining and using functions:
+bash
+Copy code
+#!/bin/bash
+function greet {
+    echo "Hello, $1!"
+}
+greet "Vandana"
+2. Error Handling and Debugging
+Enable debugging:
+
+bash
+Copy code
+#!/bin/bash
+set -x  # Enable debugging
+echo "This will be debugged"
+set +x  # Disable debugging
+Exit on error:
+
+bash
+Copy code
+#!/bin/bash
+set -e  # Exit on any error
+echo "This script will stop if any command fails"
+3. Automating AWS Tasks
+Example of a shell script to automate AWS EC2 instance creation using AWS CLI:
+bash
+Copy code
+#!/bin/bash
+aws ec2 run-instances --image-id ami-xxxxxxx --count 1 --instance-type t2.micro --key-name MyKeyPair
+Real-time Scenarios and Use Cases
+Backup Script: Automate the backup of important directories and log the results.
+
+bash
+Copy code
+#!/bin/bash
+tar -czf /backup/mydata-$(date +%F).tar.gz /home/user/data
+echo "Backup completed on $(date)" >> /var/log/backup.log
+Jenkins Job Triggering Script: Automatically trigger Jenkins job after deploying code.
+
+bash
+Copy code
+#!/bin/bash
+curl -X POST http://jenkins-server/job/deploy-job/build
+
+
+# Shell scripting
+
+Shell scripting is the process of writing a series of commands in a file that can be executed by a Unix/Linux shell (such as Bash, Zsh, or Ksh) to automate tasks. Shell scripts are widely used for system administration, software deployment, task scheduling, and automating repetitive tasks in DevOps.
+
+Key Components of Shell Scripting
+Shell:
+A shell is a command-line interpreter that provides a way for users to interact with the operating system. Popular shells include:
+
+Bash (Bourne Again Shell): Most common in Linux systems.
+Zsh: An extended version of Bash with additional features.
+Ksh (Korn Shell): Known for its scripting capabilities.
+Script:
+A script is a text file containing a series of commands that are executed sequentially by the shell.
+
+Why Use Shell Scripting in DevOps?
+Automation: Automates routine tasks like deployments, backups, and monitoring.
+Task Scheduling: Can be used with cron jobs to run tasks at specified intervals.
+System Management: Helps manage servers, monitor logs, and control services.
+Infrastructure as Code: Facilitates tasks like provisioning servers or configuring environments.
+Pipeline Integration: Often used in CI/CD pipelines to trigger builds, run tests, or deploy applications.

@@ -1,0 +1,134 @@
+# Task:
+Title: Set Up an Apache Web Server using Ansible
+Description:
+Create an Ansible playbook to set up an Apache web server on a remote machine. Ensure that:
+
+Apache is installed.
+The service is enabled and running.
+A custom HTML page is deployed at /var/www/html/index.html.
+The firewall allows HTTP traffic (port 80).
+Test the setup by accessing the webpage from your browser.
+
+Priority: Medium
+Acceptance Criteria:
+
+Playbook runs successfully without errors.
+Accessing the server's IP in a browser shows the custom HTML page.
+
+ ---
+- name: Set up Apache Web Server
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install Apache
+      ansible.builtin.yum:
+        name: httpd
+        state: present
+
+    - name: Ensure Apache service is started and enabled
+      ansible.builtin.service:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: Deploy custom HTML page
+      ansible.builtin.copy:
+        content: |
+          <html>
+          <head>
+              <title>Welcome to Apache Server</title>
+          </head>
+          <body>
+              <h1>Hello! This is a custom Apache web page deployed using Ansible.</h1>
+          </body>
+          </html>
+        dest: /var/www/html/index.html
+        mode: '0644'
+
+    - name: Allow HTTP traffic in firewall
+      ansible.builtin.firewalld:
+        port: 80/tcp
+        permanent: yes
+        state: enabled
+      notify: restart firewalld
+
+  handlers:
+    - name: restart firewalld
+      ansible.builtin.service:
+        name: firewalld
+        state: restarted
+Explanation:
+Install Apache:
+Installs the httpd package on the target machine.
+
+Start and Enable Apache:
+Ensures that the Apache service is running and will start on boot.
+
+Deploy Custom HTML Page:
+Creates an index.html file with a custom HTML content at /var/www/html/.
+
+Allow HTTP Traffic:
+Opens port 80 in the firewall to allow HTTP traffic. The handler restarts the firewall to apply changes.
+
+How to Run the Playbook:
+Ensure your inventory file has the target machine(s) listed under all.
+Run the playbook with:
+
+ansible-playbook -i inventory_file_name playbook_name.yml
+
+# Task 1: Create a File on a Remote Machine
+Title: Create a file using Ansible
+Description:
+Write an Ansible playbook to create a file named ansible_basic.txt in the /tmp directory on a remote machine. The file should contain the text:
+"This is my first Ansible task!"
+
+Priority: Low
+Acceptance Criteria:
+
+
+The playbook runs without errors.
+The file /tmp/ansible_basic.txt is created on the remote machine with the correct content.
+
+Steps to Complete the Task:
+Set up your inventory file:
+An inventory file lists the remote machine(s) where you want to run the playbook. Here's an example of an inventory file (inventory.ini):
+
+
+[myservers]
+remote_host ansible_host=your_remote_ip ansible_user=your_username ansible_ssh_private_key_file=path_to_ssh_key
+Replace your_remote_ip, your_username, and path_to_ssh_key with the actual values for your setup.
+
+Create the Ansible playbook:
+Here's a simple Ansible playbook (create_file.yml) for the task:
+
+yaml
+Copy code
+---
+- name: Basic Ansible Task - Create a file
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Create a file with custom content
+      ansible.builtin.copy:
+        content: "This is my first Ansible task!"
+        dest: /tmp/ansible_basic.txt
+        mode: '0644'
+        
+Explanation:
+
+hosts: all means the playbook will run on all hosts listed in your inventory.
+become: yes ensures the task runs with elevated privileges (required for writing to /tmp).
+The ansible.builtin.copy module is used to create the file with the specified content.
+dest: /tmp/ansible_basic.txt specifies the location where the file will be created.
+mode: '0644' sets the file's permissions (readable by everyone, writable by the owner).
+Run the playbook:
+Use the following command to run your playbook:
+
+bash
+Copy code
+ansible-playbook -i inventory.ini create_file.yml
+Expected Outcome:
+The playbook should run without errors.
+A file named ansible_basic.txt will be created in the /tmp directory on the remote machine.
+The file should contain the text: "This is my first Ansible task!"

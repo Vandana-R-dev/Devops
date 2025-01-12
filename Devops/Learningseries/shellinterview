@@ -1,0 +1,39 @@
+ # List some of the commonly used shell commands ?
+  ls – List files and directories
+cd – Change directory
+pwd – Print working directory
+cp – Copy files and directories
+mv – Move or rename files
+rm – Remove files and directories
+mkdir – Create directories
+touch – Create empty files
+cat – Display the content of files
+echo – Print text to the terminal
+grep – Search for patterns in files
+find – Search for files
+chmod – Change file permissions
+ps – Display currently running processes
+top – Show real-time system processes
+kill – Terminate a process by its PID
+
+# Write a simple shell script to list all processes 
+ ps -ef
+
+# Write a script to print only errors from a remote log
+ curl url(error files stored path) |  grep 'ERROR'
+ #!/bin/bash
+ssh user@remote_host "cat /var/log/syslog" | grep -i "error"
+
+# Write a shell script to print numbers divided by 3 & 5 and not 15
+Write a script to print number of "S" in Mississippi
+ How will you debug the shell script?
+ What is crontab in Linux? Can you provide an example of usage?
+ How to open a read-only file?
+ What is a difference between soft and hard link?
+ What is a difference between break and continue statements ?
+ What are some disadvantages of Shell scripting?
+ What a different types of loops and when to use?
+Is bash dynamic or statically typed and why?
+ Explain about a network troubleshooting utility?
+ How will you sort list on names in a file ?
+ How will you manage logs of a system that generate huge log files everyday?

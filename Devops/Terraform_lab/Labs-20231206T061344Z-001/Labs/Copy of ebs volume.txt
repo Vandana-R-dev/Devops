@@ -1,0 +1,32 @@
+1. buy a pendrive
+2. attach that pendrive
+3. create a partition
+4. format the partition
+5. mount that volume
+
+to create a partition:-
+-> fdisk -l {show the storage or disk attached}
+-> fdisk /dev/xvdf
+
+n- for new partition
+p- primary partition
+press three times enter
+w- for save
+
+to format the partiton
+
+-> mkfs.ext4 /dev/xvdf1
+
+to mount the volume
+-->df -h {show mounted volume}
+-->mkdir pendrive
+--> mount /dev/xvdf1 pendrive
+--> df -h
+
+
+first detach the volume
+--------------------------------
+start a different ec2-instance
+then we attached the same volume to this ec2-instance
+-->mkdir storage
+-->mount /dev/xvdf1 storage

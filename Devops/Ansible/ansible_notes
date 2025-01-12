@@ -1,7 +1,15 @@
-ANSIBLE
+**ANSIBLE**
+
+
+# What is Ansible?
+Ansible is an open-source IT automation tool that simplifies tasks like configuration management, application deployment, and orchestration of complex workflows. It uses a simple, human-readable language called YAML to define automation tasks, known as playbooks.
+
+**Agentless:** Ansible doesn't require agents to be installed on managed nodes. It connects via SSH (Linux) or WinRM (Windows).
+Declarative: You define the desired state of the system, and Ansible takes care of achieving it.
+Idempotent: Ansible ensures that running the same task multiple times yields the same result, preventing unintended changes.
 In ansible we have control node and manage nodes. Assume control node is one virtual machine manage nodes also virtual machines if we get task to install java on manage nodes you have to write a playbook on control nodes no need to go to each server and write it.As a prerequist manage ode should have python.
 Ansible is a popular open-source automation tool designed for simplifying IT tasks, including configuration management, application deployment, and orchestration. Here’s why Ansible is needed:
-Orchestration in Ansible involves managing the interactions and dependencies between different systems, services, or tasks to achieve a coordinated outcome. Unlike simple provisioning, orchestration focuses on automating complex workflows where multiple components need to work together seamlessly.
+**Orchestration** in Ansible involves managing the interactions and dependencies between different systems, services, or tasks to achieve a coordinated outcome. Unlike simple provisioning, orchestration focuses on automating complex workflows where multiple components need to work together seamlessly.
 ________________________________________
 1. Automation of Repetitive Tasks
 •	Problem: Managing IT infrastructure often involves repetitive tasks like configuring servers, deploying applications, and ensuring consistency across environments.
@@ -49,7 +57,7 @@ Python maintainance after sometime would be tough if we need to install modules 
 If you want to communicate with api good to go with python ansible don’t have modules for it.
 Ansible passwordless authentication
 Passwordless authentication in Ansible typically refers to the ability to run tasks or playbooks on managed nodes (remote machines) without having to manually enter passwords. This is achieved by using SSH key-based authentication.
-Inventory
+# Inventory
 Ansible inventory is a file or collection of sources that tells Ansible which machines (hosts) to manage. It defines groups, individual hosts, and related variables. Here's a simple breakdown of types of inventories and their explanation:
 1. Static Inventory
 A static inventory is a file (e.g., hosts or inventory.ini) where you manually list hosts and groups.
@@ -92,7 +100,7 @@ bash
 Copy code
 ansible-inventory -i aws_ec2.yaml --graph
 
-Adhoc Commands:(one line command to complete task)
+**Adhoc Commands:(one line command to complete task)**
 If you want to do simple tasks like installing apache server, installing or unistalling softwares.
 Ansible ad-hoc commands allow you to run tasks without writing a full playbook. These commands are quick, one-off operations for performing actions on managed nodes.
 Here’s an overview and some examples of Ansible ad-hoc commands.

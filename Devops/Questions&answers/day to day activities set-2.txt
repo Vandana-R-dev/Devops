@@ -1,0 +1,66 @@
+Day-to-Day Activities as a DevOps Engineer
+Morning (9:00 AM – 12:00 PM)
+1. CI/CD Pipeline Management (1–2 hours)
+
+Monitor and review existing Jenkins pipelines for any issues or failures.
+Debug and fix errors in pipelines by collaborating with development teams.
+Identify opportunities to improve pipeline performance (e.g., reduce build times).
+Create or modify Jenkins pipelines to integrate new applications or services.
+2. Version Control Management (30 minutes)
+
+Manage Git repositories by enforcing branching strategies (e.g., feature, release, hotfix branches).
+Merge pull requests after code review, ensuring proper commit messages and code quality.
+Assist developers in resolving merge conflicts during code integration.
+3. Cross-Functional Collaboration (30 minutes)
+
+Attend daily stand-ups to stay aligned with the development and QA teams.
+Coordinate with QA for pipeline enhancements (e.g., adding automated tests).
+Discuss deployment schedules or environment-related issues with the operations team.
+Afternoon (12:30 PM – 4:00 PM)
+4. Cloud Infrastructure Management & Automation (2 hours)
+
+Use Terraform to manage infrastructure as code:
+Write or update Terraform scripts for provisioning resources (e.g., EC2 instances, RDS, VPC, EKS).
+Test infrastructure changes in a non-production environment.
+Plan and execute infrastructure changes after peer review.
+Automate infrastructure setup using Ansible playbooks:
+Write playbooks for configuring servers or deploying applications.
+Test new Ansible playbooks in a local environment before running them on production.
+5. Proactive System Monitoring (1 hour)
+
+Review CloudWatch or Prometheus dashboards to monitor system performance and availability.
+Set up or update alerts for critical metrics (e.g., CPU usage, memory, request latency).
+Investigate alerts received during the day and implement fixes as required.
+Ensure that SLIs and SLOs are defined and met for critical services.
+Evening (4:00 PM – 6:00 PM)
+6. Security Integration (1 hour)
+
+Review CI/CD pipelines for security vulnerabilities and improve them using tools like SonarQube or security scanners.
+Ensure that secrets and sensitive information are managed securely using tools like AWS Secrets Manager or Vault.
+Update or implement automated security checks within the pipelines.
+Work on integrating DevSecOps practices into the deployment process.
+7. Scripting and Automation (1 hour)
+
+Write shell or Python scripts to automate repetitive tasks (e.g., log rotation, backup automation, resource cleanup).
+Enhance existing scripts by adding error handling, logging, and notifications.
+Test and document the scripts for future use.
+End of Day (6:00 PM – 7:00 PM)
+8. Learning & Industry Trends (1 hour)
+
+Read technical blogs or attend webinars on emerging DevOps tools and practices (e.g., new features in Kubernetes, CloudFormation best practices).
+Explore hands-on labs for AWS CloudFormation and practice writing templates for common use cases.
+Continue learning Linux and shell scripting by solving small tasks or challenges.
+Work on advanced Ansible tasks, such as writing dynamic inventories or using Ansible Vault.
+Weekly/Recurring Tasks
+Sprint Planning & Retrospective (Weekly)
+Participate in sprint planning to discuss new tasks and goals. Review the completed tasks during the retrospective and suggest improvements.
+
+Code & Pipeline Audits (Bi-weekly)
+Conduct audits of Git repositories and CI/CD pipelines to ensure best practices are followed.
+
+Backup & Disaster Recovery Drills (Monthly)
+Run disaster recovery drills by simulating failures and verifying the ability to restore services from backups.
+
+Security Review & Penetration Testing (Quarterly)
+Collaborate with the security team to review the application and infrastructure security posture.
+

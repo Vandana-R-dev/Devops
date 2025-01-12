@@ -1,0 +1,84 @@
+1.Install Docker
+Ensure Docker is installed on your system. You can download it from Docker's official website.
+2. Write a Dockerfile
+A Dockerfile is a text file that contains the instructions to build a Docker image.
+
+Example: Creating an Nginx server
+
+dockerfile
+Copy code
+# Use an official Nginx image as a base
+FROM nginx:latest
+
+# Copy a custom HTML file into the container
+COPY index.html /usr/share/nginx/html/index.html
+
+# Expose the container's port 80
+EXPOSE 80
+Save this file as Dockerfile in your project directory.
+3. Add Supporting Files
+Add any supporting files, such as an index.html.
+
+Example index.html:
+
+html
+Copy code
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome to Docker</title>
+</head>
+<body>
+    <h1>Hello, Docker World!</h1>
+</body>
+</html>
+
+4. Build the Docker Image
+Use the docker build command to create an image from the Dockerfile.
+
+bash
+Copy code
+docker build -t my-nginx-image .
+-t my-nginx-image: Tags the image with the name my-nginx-image.
+.: Specifies the build context (current directory).
+5. Verify the Docker Image
+List the available Docker images to ensure your image was created.
+
+bash
+Copy code
+docker images
+6. Create and Run a Docker Container
+Use the docker run command to create and start a container from the image.
+
+bash
+Copy code
+docker run -d -p 8080:80 --name my-nginx-container my-nginx-image
+-d: Runs the container in detached mode (in the background).
+-p 8080:80: Maps port 80 in the container to port 8080 on your host machine.
+--name my-nginx-container: Names the container.
+my-nginx-image: The name of the image to use.
+7. Verify the Running Container
+Check that the container is running.
+
+bash
+Copy code
+docker ps
+8. Access the Application
+Open your browser and navigate to http://localhost:8080. You should see your index.html content.
+
+9. Manage Containers
+Stop the container:
+
+bash
+Copy code
+docker stop my-nginx-container
+Remove the container:
+
+bash
+Copy code
+docker rm my-nginx-container
+Remove the image:
+
+bash
+Copy code
+docker rmi my-nginx-image

@@ -1,0 +1,37 @@
+Day-3 (Virtual Machine)
+
+1. # What is a Server?
+A server is a computer that provides services, data, or resources to other computers (called clients) over a network. It can store files, run applications, and host websites.
+
+2. # What is a VM (Virtual Machine)?
+A VM is software that acts like a physical computer. It runs an operating system and applications just like a real machine, but it shares the physical hardware with other VMs.
+
+3. # What is a Hypervisor?
+A hypervisor is software that allows multiple virtual machines (VMs) to run on a single physical machine by managing the hardware resources like CPU, memory, and storage.
+Some of the popular hypervisors are VMware
+
+4. # Difference between Physical and Virtual Machine
+Physical Machine	Virtual Machine
+Real hardware (CPU, memory)	Virtual hardware (software-based)
+Runs directly on hardware	Runs on top of a hypervisor
+Cannot be easily copied or moved	Can be easily cloned and moved
+High cost	Cost-effective (less hardware needed)
+5. # Advantages of Virtual Machines
+Cost-effective – Saves money by reducing the need for physical hardware.
+Easy to manage – VMs can be quickly created, deleted, or cloned.
+Efficient use of resources – Multiple VMs can run on a single physical machine.
+Isolation – Each VM is isolated, so issues in one VM don’t affect others.
+Portability – VMs can be easily moved between different servers.
+Let me know if you'd like more detailed examples!
+
+**Day-4**
+To automate process in AWS we can use:
+Aws CLi
+AWS API(python have boto3)
+AWS CFT
+Terraform
+AWS CDk(cloud development kit)
+
+# Aws CLi
+AWS cli menas we should download from internet and install it.
+After installation if we give aws version in command prompt we get everything.
