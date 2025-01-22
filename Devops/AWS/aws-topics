@@ -1,0 +1,6 @@
+AWS Compute: EC2, Lambda, Auto Scaling, Elastic Load Balancer
+AWS Storage: S3, EBS, Glacier, EFS
+AWS Networking: VPC, Route 53, CloudFront, Direct Connect
+AWS Database: RDS, DynamoDB, Redshift, Aurora
+AWS Security: IAM, KMS, CloudTrail, GuardDuty
+AWS Monitoring: CloudWatch, CloudTrail, CloudFormation, Trusted Advisor

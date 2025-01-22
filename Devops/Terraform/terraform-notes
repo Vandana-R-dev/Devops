@@ -1,0 +1,146 @@
+Infrastructure are like EC2, VPc, S3.
+Infrastructure as Code (IaC) is a modern approach to managing and provisioning IT infrastructure using code rather than manual processes.
+Traditionally managing IT Infrstructure manually was difficult person has to physically install and configure servers. It was expensive, slow and inconsistent.
+IAC enables the devs or operation teams to automatically install , configure and manage infra.
+Terraform Uses Hasicorp language.
+# Uses:
+  1. Managing existing Infra(we can import and use it)
+  2. Creating new Infra
+# Advantages:
+ 1. **Consistency**
+Eliminates Configuration Drift: Manual infrastructure provisioning can lead to discrepancies over time. IaC ensures all environments (development, testing, production) are consistently configured.
+Version Control: Infrastructure configurations can be versioned, reviewed, and reverted like application code, reducing errors and inconsistencies.
+2. Automation and Speed
+Faster Deployments: IaC automates the provisioning process, reducing time from days or hours to minutes.
+Reproducibility: You can quickly replicate environments for scaling, testing, or disaster recovery.
+3. Cost Efficiency
+Optimized Resource Use: Automating infrastructure spin-up and teardown ensures you use resources only when needed, avoiding unnecessary costs.
+Reduced Manual Effort: Automating repetitive tasks reduces the need for manual intervention and frees up team capacity for higher-value tasks.
+4. Improved Collaboration
+DevOps Enablement: IaC aligns development and operations teams by using the same tools and processes, fostering collaboration.
+Shared Knowledge: Infrastructure is expressed as code, making it easier for team members to understand, share, and modify configurations.
+5. Scalability
+Dynamic Scaling: IaC supports the creation of scalable infrastructure to handle varying workloads by automating resource provisioning and scaling.
+Global Deployment: You can deploy infrastructure across multiple regions and environments with minimal effort.
+6. Reliability
+Disaster Recovery: IaC makes disaster recovery simpler by enabling rapid recreation of infrastructure.
+Testing and Validation: Infrastructure code can be tested and validated before deployment to minimize downtime and ensure reliability.
+7. Compliance and Security
+Policy as Code: IaC tools can enforce security policies and compliance standards programmatically.
+Audit Trails: With IaC, you can track who made what changes and when, providing transparency and traceability.
+8. Agility and Flexibility
+Experimentation: Developers can safely experiment with infrastructure changes in isolated environments without impacting production.
+Multi-Cloud Support: IaC makes it easier to manage infrastructure across multiple cloud providers.
+
+
+# Terraform written in golang or hcl
+
+Terraform itself is written in Go (Golang), a general-purpose programming language developed by Google. Go is used for building Terraform's core functionality, including its CLI, providers, and other components.
+
+package main
+
+import (
+    "fmt"
+    "os"
+)
+
+func main() {
+    fmt.Println("Welcome to Terraform!")
+    os.Exit(0)
+}
+
+However, the configuration files you write to define infrastructure in Terraform use HCL (HashiCorp Configuration Language). HCL is a domain-specific language designed specifically for infrastructure as code and is what you use to describe your desired infrastructure state.
+
+# Specify the provider (e.g., AWS)
+provider "aws" {
+  region = "us-west-2"
+}
+
+# Define an EC2 instance
+resource "aws_instance" "example" {
+  ami           = "ami-12345678"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "MyExampleInstance"
+  }
+}
+
+# Define an S3 bucket
+resource "aws_s3_bucket" "example_bucket" {
+  bucket = "my-unique-bucket-name"
+  acl    = "private"
+
+  tags = {
+    Environment = "Dev"
+    Team        = "DevOps"
+  }
+}
+
+# Terraform Architecture:
+
++--------------------------+
+|  User (Writes HCL Code)  |
++--------------------------+
+             |
+             v
++--------------------------+
+|    Terraform CLI         |
+| (init, plan, apply, etc.)|
++--------------------------+
+             |
+             v
++--------------------------+
+|   Terraform Core         |
+| - Reads Configuration    |
+| - Compares State         |
+| - Generates Plan         |
++--------------------------+
+             |
+             v
++-----------------------------+
+|       Providers             |
+| (AWS, Azure, GCP, etc.)     |
++-----------------------------+
+             |
+             v
++-----------------------------+
+|    Cloud API / Platform     |
+| (AWS API, Azure API, etc.)  |
++-----------------------------+
+
++-----------------------------+
+|        State File           |
+| (Local or Remote Backend)   |
++-----------------------------+
+
+Description:
+User: Writes Terraform configuration files in HCL.
+CLI: Executes commands like init, plan, apply, and destroy.
+Core: Core functionality of Terraform, responsible for:
+Reading configurations.
+Comparing with the current state file.
+Generating a plan for changes.
+Providers: Plugins that allow Terraform to interact with platforms like AWS, Azure, GCP, Kubernetes, etc.
+Cloud APIs: Providers use APIs to provision resources.
+State File: Tracks infrastructure resources (local or remote).
+
+Differences between Terraform and Ansible:
+
+**Feature	          Terraform	                           Ansible**
+Primary Purpose	  Infrastructure provisioning (IaC)	   Configuration management (and provisioning)
+State Management  Manages state through a state file (tracks changes)	Does not manage state; always applies changes
+Approach	      Declarative (define what you want)	Procedural (define how to achieve it)
+Idempotency	      Ensures idempotency by managing infrastructure state	Ensures idempotency at task level
+Execution	      Executes in a plan and applies changes	Executes tasks immediately
+Use Case	      Creating and managing cloud resources (e.g., VMs, networks)	Configuring and managing systems (e.g., installing software)
+Speed of Operation	Can be slower for large-scale changes due to state management	Fast execution for configuring systems
+Cloud Provider Support	Excellent (AWS, Azure, GCP, etc.)	Limited but works with cloud modules for provisioning
+Language	HCL (HashiCorp Configuration Language)	YAML (with modules in Python)
+Required Agent	No agents required	No agents required (works via SSH or WinRM)
+Best Use Cases	Infrastructure creation and management	System configuration, software installation, patching, etc.
+Integration with Other Tools	Integrates well with tools like Ansible for configuration	Often integrates with Terraform for infrastructure provisioning
+Example Tools	terraform apply, terraform plan	ansible-playbook
+
+
+Note: If we need to create any infrastructure just google it aws ec2 terraform you should go to io registry

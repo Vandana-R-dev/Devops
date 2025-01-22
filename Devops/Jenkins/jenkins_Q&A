@@ -316,7 +316,8 @@ Application server (e.g., Tomcat, JBoss, or a cloud service like AWS, Azure) con
 Create a New Job:
 
 Open Jenkins and click on "New Item".
-Choose "Freestyle project" (for simplicity) and give your job a name (e.g., DeployJavaApp).
+Choose "
+ project" (for simplicity) and give your job a name (e.g., DeployJavaApp).
 Configure Source Code Management:
 
 In the job configuration page, scroll down to Source Code Management.
