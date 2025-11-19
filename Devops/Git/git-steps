@@ -1,0 +1,119 @@
+First need to install git in your sytem.
+git --version
+
+In mac, if its not installed in command prompt just type 
+xcode-select --install
+
+Once you create a folder in command prompt switch to that folder just typing
+code .
+
+If this doesn't work go to visual studio 
+command+shift+p
+
+In the command pallette type,
+shell command
+Install it
+-------------------------------------
+**Clone the repo:**
+
+git clone https://github.com/Vandana-R-dev/Devops.git
+
+to switch that repo:
+ls
+
+cd Devops
+
+code .
+-----------------------------------------
+created a new folder under devopes as a git project
+mkdir git-project
+cd git-project
+git init=initializes a git repository in git folder
+vi index.html //added sample code in it
+git add .
+git commit -m "created a basic html file"
+(if we dont have repository means we can follow these steps
+git remote add origin "repo url"
+git branch -m master
+git push -u origin main)
+(-u means upstream branch next time if u push something git remebrs this branch so if u give just git push also it understoods)
+
+git push origin master
+git checkout -b developers (here b means branch name)
+
+
+
+-----------------------------------
+
+**when to use git init?**
+
+1. when starting a new project from scratch
+    mkdir git-project
+    cd git-project
+    git init
+2. when converting an existing folder into git repo
+   cd old-project
+   git init
+   git add .
+3. when creating a new repo that you will later push to github
+   git init
+   git add .
+   git commit -m "commit message"
+
+**when not to use git init**
+
+1. when you clone git already does the initialization for you
+git clone "htps://"
+it automatically creates a folder run git init internally adds a remote origin downloads all commits and branches
+
+2. when you are already inside git repo
+if the folder already .git directory never run git init
+git status
+========================
+**Merge conflict:**
+
+if two branches have different content when you are doing it shows merge conflict
+
+For example, we have index.html in master branch if we chnage index.html in something else and developers branch index.html have different content then we try to merge we get conflict because smae files but content is different.
+
+✅ STEP-1: Go to master branch
+git checkout master
+✅ STEP-2: Edit the SAME LINE in index.html
+Example:
+In master, open file:
+vi index.html
+Change the first line to:
+<h1>Version from MASTER</h1>
+Save, then:
+git add index.html
+git commit -m "master version"
+git push
+✅ STEP-3: Go to developers branch
+git checkout developers
+Edit the SAME EXACT line again:
+vi index.html
+Change the same line to:
+<h1>Version from DEVELOPERS</h1>
+Save, commit, push:
+git add index.html
+git commit -m "developers version"
+git push
+⚠️ Now master and developers have conflicting lines.
+Both changed the same line differently.
+✅ STEP-4: Try to merge developers → master
+git checkout master
+git merge developers
+
+Output:
+vandanar@Vandanas-MacBook-Air git-project % git merge developers
+Auto-merging Devops/Git/git-project/index.html
+CONFLICT (content): Merge conflict in Devops/Git/git-project/index.html
+Automatic merge failed; fix conflicts and then commit the result.
+vandanar@Vandanas-MacBook-Air git-project % 
+=====================================
+
+
+
+
+
+
