@@ -1,0 +1,160 @@
+https://www.youtube.com/redirect?event=video_description&redir_token=QUFFLUhqa2Z5TDRqTFRVa2VsSko4d0xWcVJzak1oeklCQXxBQ3Jtc0ttSDhYUkc3dkFaU1ZyN3hlUENyalRGRFNjTkd3VjhYNlF0RmJJRUZUbHkyTmdLRUQ0UWJKWFZUZEw3aWdfTU1DUG1GQlgtUUtWdmxlX040ekE5ZUZDcWJKR3JBODVxbTBEcWtJbmQ4QXdZWVFYNTZoZw&q=https%3A%2F%2Forgpad.info%2Fs%2FsbwXdJ9N5wc&v=St48epdRDZw
+
+Learning path
+
+____________________________
+PYTHON:
+
+Pythons is programming language used for 
+websites
+AI
+Automation
+Games
+IT's mostly like giving instructions to computers
+
+print=>shows output
+" "=>used for strings
+
+**Variables:**(storing data)
+
+if we want to print something we can store in variables
+
+name="vandana"
+age=32
+print("name",age)
+
+**Take Input (Make it Interactive)**
+
+name=input("enter your name")
+age=input("enter your age")
+print("hi",name)
+print("my age is",age)
+
+input() → takes user input
+
+
+**DAY 2 — Decision Making (if/else)**
+
+if → checks condition
+>= → greater than or equal to
+<= → less than or eual to
+
+age=23
+if age>=20:
+    print("you are major")
+else:
+    print("you are minor")
+
+
+    Python asks:
+Is age >= 18 ?
+If YES:
+Adult
+If NO:
+Minor
+🎮 YOUR NEW MISSIONS
+
+
+**DAY 3 CLASS — Conditions Deep Dive**
+
+🎯 PART 1 — Comparison Operators
+These compare values.
+Operator	Meaning
+>	greater than
+<	smaller than
+>=	greater or equal
+<=	smaller or equal
+==	equal
+!=	not equal
+
+multiple elif conditions:
+
+marks = 100
+
+if marks >= 90:
+    print("Excellent")
+elif marks >= 70:
+    print("Good")
+else:
+    print("Need practice")
+
+Difference
+= means assign value.
+== means compare value.
+
+**Loops:**
+
+A loop repeats code
+
+Example:
+Instead of:
+print("Hello")
+print("Hello")
+print("Hello")
+
+we do
+
+for i in range(3):
+  print("hello")
+
+⚠️ IMPORTANT
+range(5) does NOT include 5.
+It stops BEFORE 5.
+
+🎯 while Loop
+Used when we don’t know exact repetitions.
+
+count = 1
+
+while count <= 5:
+    print(count)
+    count += 1
+
+BAD LOOP:
+while True:
+    print("Hello")
+
+**Function:**
+
+Usually block of reusable code
+
+❌ Without Function
+print("Hello Rahul")
+print("Hello Amit")
+print("Hello Priya")
+
+✅ With Function
+def greet(name):
+    print("Hello", name)
+
+greet("vandana")
+greet("rakesh")
+greet("charishya")
+
+🧠 Understanding
+Function Creation
+def greet(name):
+Part	Meaning
+def	create function
+greet	function name
+(name)	parameter
+:	start block
+
+🧠 Understanding
+Function Creation
+def greet(name):
+Part	Meaning
+def	create function
+greet	function name
+(name)	parameter
+:	start block
+
+🧠 6. MULTIPLE RETURN VALUES
+Example
+def math(a, b):
+    return a+b, a-b
+
+sum1, sub1 = math(10, 5)
+
+print(sum1)
+print(sub1)

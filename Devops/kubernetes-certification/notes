@@ -1,0 +1,7085 @@
+🌐 Kubernetes Cluster Architecture (Simple Summary)
+🚢 Basic Idea
+Kubernetes works like a shipping system:
+* Master Node = Control ship (brain) 🧠
+* Worker Nodes = Cargo ships (do the work) ⚙️
+A cluster is just a group of these nodes working together to run your applications (containers). 
+
+🧠 Master Node (Control Plane)
+This is the brain of Kubernetes. It manages everything.
+🔑 Main Components:
+1. ETCD
+* A key-value database
+* Stores:
+    * Cluster state
+    * Configuration
+* Very important because:👉 If ETCD is lost → cluster data is gone
+
+2. Kube API Server
+* The main entry point to Kubernetes
+* All commands (kubectl, UI, etc.) go through this
+* Acts like a central communication hub
+
+3. Scheduler
+* Decides:👉 Which worker node should run a container?
+* Considers:
+    * CPU, memory
+    * Node conditions
+    * Rules like affinity/taints
+👉 Think of it like a smart load balancer
+
+4. Controllers
+* Ensure desired state is maintainedExample:
+* If 3 pods should run but only 2 are running → it creates 1 more
+👉 They constantly monitor and fix things automatically
+
+⚙️ Worker Nodes (Where Apps Run)
+These actually run your applications (containers).
+🔑 Main Components:
+1. Kubelet
+* Runs on every worker node
+* Talks to API Server
+* Ensures:
+    * Containers are running properly
+    * Reports node status
+👉 Think of it as a node manager
+
+2. Kube Proxy
+* Handles networking
+* Allows communication between:
+    * Pods
+    * Services
+    * Nodes
+👉 Example: Web app talking to database across nodes
+
+3. Container Runtime
+* Software that actually runs containersExamples:
+* Docker
+* containerd
+* CRI-O
+👉 Without this → no containers can run
+
+🔄 How Everything Works Together
+1. User sends request → API Server
+2. API Server stores data in ETCD
+3. Scheduler picks best worker node
+4. Kubelet runs container on that node
+5. Controllers ensure everything stays correct
+6. Kube Proxy handles communication
+👉 Result: Fully automated system
+
+📊 Final Structure
+Part	Role
+Master Node	Controls and manages cluster
+Worker Node	Runs applications
+
+💡 Extra Important Points (My Additions)
+🔥 1. Why this architecture is powerful
+* Fully automated
+* Self-healing (auto-restarts containers)
+* Easy scaling (increase/decrease pods)
+* Works across cloud + on-prem
+
+⚠️ 2. Real-world critical insight
+* ETCD is the most critical component👉 Always back it up in production
+
+⚡ 3. Control Plane vs Worker Nodes
+* Master Node is also called Control Plane
+* In real setups:
+    * Multiple master nodes are used (High Availability)
+
+🧠 4. Easy Memory Trick
+Remember:
+👉 "SACKE" for Master
+* Scheduler
+* API Server
+* Controllers
+* Key-value store (ETCD)
+👉 "KKP" for Worker
+* Kubelet
+* Kube Proxy
+* Pods
+
+🚀 5. Most common interview question
+👉 “What happens when you deploy a pod?”
+Answer:
+* API Server → ETCD → Scheduler → Node → Kubelet → Pod runs
+
+🧾 Final One-Line Summary
+👉 Kubernetes splits work into:
+* Master Node → decides everything
+* Worker Nodes → execute everything
+
+
+
+
+
+          +----------------------+
+          |   Master Node       |
+          |----------------------|
+          | API Server          |
+          | ETCD                |
+          | Scheduler           |
+          | Controllers         |
+          +----------+----------+
+                     |
+        ---------------------------------
+        |                               |
++------------------+         +------------------+
+|  Worker Node 1   |         |  Worker Node 2   |
+|------------------|         |------------------|
+| Kubelet          |         | Kubelet          |
+| Kube Proxy       |         | Kube Proxy       |
+| Pods             |         | Pods             |
++------------------+         +------------------+
+
+📦 **Docker vs ContainerD — Full Summary**
+
+📦 Docker, Container Runtime & CI/CD Notes
+
+---
+
+🧠 1. What is Docker?
+
+Docker is a tool used to:
+
+- Build applications into **images**
+- Package code + dependencies
+- Run containers (mainly in local/dev)
+
+👉 Docker = Packaging tool
+
+---
+
+🔁 2. Docker in CI/CD
+
+CI/CD = Continuous Integration + Continuous Deployment
+
+Common tools:
+- Jenkins
+- GitHub Actions
+- GitLab CI
+
+---
+
+🚀 CI/CD Flow
+
+Code → Build → Docker Image → Push → Deploy → Run
+
+---
+
+📦 Example Dockerfile
+
+
+FROM node:18
+WORKDIR /app
+COPY . .
+RUN npm install
+CMD ["npm", "start"]
+
+⚙️ CI Pipeline Example
+
+docker build -t myapp:v1 .
+docker push myapp:v1
+
+👉 Docker is used for build and push
+
+⚙️ 3. **Who runs containers?**
+In Kubernetes / OpenShift:
+❌ Docker is NOT used to run containers
+Instead:
+* containerd
+* CRI-O
+👉 These are called container runtimes
+
+**🔥 4. Why Docker was removed from Kubernetes?**
+* Not CRI-compatible
+* Needed extra layer (dockershim)
+* More complex
+👉 Kubernetes removed Docker runtime (v1.24)
+
+🧠 5. Important Concept
+Docker has 2 roles:
+✅ Build Tool
+* Build images
+* Push images
+❌ Runtime (removed in Kubernetes)
+* Replaced by containerd / CRI-O
+
+📦 6. Image vs Container
+* Image = blueprint
+* Container = running instance
+Example:
+
+docker build → image
+docker run → container
+
+
+🔁 7. Modern Flow
+Developer → Docker build → Push → Kubernetes/OpenShift → containerd/CRI-O runs
+
+**🧪 8. End-to-End Example**
+Step 1: Build
+
+docker build -t myapp:v1 .
+docker push myapp:v1
+
+Step 2: Deploy
+
+containers:
+  - name: app
+    image: myapp:v1
+
+Step 3: Run
+👉 Kubernetes uses containerd / CRI-O
+
+🧠 9. OpenShift Notes
+* Uses CRI-O runtime
+* Does NOT use Docker for running containers
+
+🔍 Check runtime in OpenShift
+
+oc debug node/<node-name>
+chroot /host
+crictl info
+
+OR
+
+ps aux | grep crio
+ps aux | grep containerd
+
+
+⚙️ 10. CLI Tools
+ctr
+* Low-level tool
+* Used for debugging
+
+nerdctl
+* Docker-like CLI for containerd
+
+nerdctl run nginx
+
+
+crictl
+* Kubernetes debugging tool
+
+crictl ps
+crictl images
+
+
+❓ 11. Is Docker Dead?
+❌ No
+Still used for:
+* CI/CD pipelines
+* Building images
+* Local development
+Not used for:
+* Running containers in Kubernetes
+
+🧠 12. Easy Analogy
+* Docker = 📦 Packing machine
+* containerd / CRI-O = 🚚 Delivery system
+* Kubernetes = 🧠 Manager
+
+📌 13. Summary Table
+Task	Tool Used
+Build image	Docker
+Push image	Docker
+Run in Kubernetes	containerd / CRI-O
+Run locally	Docker
+
+
+🎯 Interview Line
+"Docker is used for building images, while Kubernetes uses containerd or CRI-O to run containers."
+
+
+
+
+**ETCD:**
+
+etcd listens to default port:2379
+
+**ETCD command:**
+
+ETCDL is the CLI tool used to interact with ETCD:
+
+ETCDL interacts with etcdl servers via 2 API versions:
+version 2
+version 3
+By default it is set to version 2
+
+For example ETCDL version 2 supports the following commands:
+etcdctl backup
+etcdctl cluster-health
+etcdctl mk
+etcdctl mkdir
+etcdctl set
+
+Fo version2 its different:
+
+etcdctl snapshot save
+etcdctl endpoint health
+etcdctl get
+etcdctl put
+
+To set the verion we can use:
+export ETCDCTL_API=3
+
+**Kube api-server:**
+
+its responsible for
+1. Authenticate user
+2. validate request
+3. Rettrieve data
+4. Update ETCD
+5. Scheduler
+6. kubelet
+
+to search:
+
+ps-aux| grep api-server
+
+when we execute the command
+kubectl get nodes
+the utility send requests to api server. the server process this request by authenticating the user,validating the request,fetching data from etcd cluster and replying with desired information.
+
+# API server request LIFE cycle:
+
+1-Authenticates and validates request
+2-Constructs a pod object
+3-Notifies the requestor pod is created
+
+| Component       | Role                                                                 | Command/Action Example                          |
+|-----------------|----------------------------------------------------------------------|-------------------------------------------------|
+| kubectl         | CLI tool to send API requests                                        | `kubectl get nodes`                             |
+| Kube API Server | Central component for processing, authenticating, and validating requests | Processes API requests and interacts with etcd |
+| Scheduler       | Monitors API Server for unassigned pods and assigns them to worker nodes | Automatically assigns node to newly created pods |
+| Kubelet         | Runs on worker nodes to manage pod lifecycle and communicate status back to API Server | Interacts with container runtime to deploy images |
+| etcd            | Distributed key-value store used for saving cluster configuration    | Stores all cluster state data                   |
+
+
+**Kube controller Manager:**
+
+Kube controller manager is like "maintainance crew" that keeps your kubernetes cluster running smoothely by constantly checking and fixing things.
+controller is like office
+
+key tasks:
+watches the cluster state
+compares it with desired state
+acts to fix differences
+
+Kubernetes works on declarative model:
+
+you declare:
+replicas:3
+
+But you can see only 2 pods are running , a controller 
+1.detects mismatch
+2.creates 1 more pod
+3.ensures 3 pods are always running
+
+# Core controllers:
+
+**1.Node controller:**
+Monitors node health
+detects node failure
+marks node notready
+evicts pods from failed nodes
+
+Example:
+If a node stops sending hearbeats=node marked not ready=pods rescheduled
+
+**2.Replication controller:**
+Ensures specified number of replicas are running
+older version of replicaset
+
+**3.Replicaset controller:**
+Ensures correct number of pod replicas
+used by deployments
+
+**4.Deployment controller**
+Manage replicasets
+Handles rolling updates and rollbacks
+
+**5.Statefulset controller**
+Manages stateful apps(databases,kafka)
+provides:
+ stable network identity
+ ordered deployment
+ persistent storage building
+
+ **6.Daemonset controller:**
+ Ensures 1 pod per node
+ used for :
+    logging agents
+    Monitoring agents
+
+**7.JOb controller:**
+  Runs batch jobs
+
+**8.cronjob controller:**
+ Schedules jobs periodically
+
+ **9.Service account and token credentials:**
+ Creates default service account
+ Manages authentication tokens
+
+**10.Namespace controller:**
+cleanus up resources when namespace is deleted
+
+**Kube scheduler:**
+
+scheduler is reponsible for which node pod should be placed.
+Actual cretion of pod on specific node done by kubelet.
+
+# Scheduling process overview:
+
+Scheduler ensures selected node has sufficient resources and meets specific requirements.
+
+1.Filtering phase:
+In filtering phase,the scheduler eliminates nodes that do not meed  pods requirements. for example, nodes that lacks suficient cpu or memory are immediatley excluded
+
+2.Ranking phase:
+After filtering scheduler enters ranking phase.Here it  uses a prioroty function to score and compare remaining nodes on scale from 0 to 10, ultimately selecting best match. for instance, if placing a pod on one node would have 6 free cpus that node is higher score and is chosen.
+
+**kubelet:**
+
+Kubelet is often decided as "captain of the ship".it overseas node activities by managing container operations such as starting and stopping the containers based on the instructions from the master scheduler.
+Additionally,kubelet register node with cluster and continously monitors pods and their containers.
+It regularly reports status of node andits components to api server.
+
+When the kubelet receives instructions to run a container or pod it communicates with container runtime (ex:docker) to download the required image and initiate the container.It then maintains the health of these containers and ensures they operate as expected.
+
+**kube-proxy:**
+
+* It runs on every node on the cluster.
+* It watches for new services
+* when service is created it sets up rules to send traffic to corrected pods
+
+Why do we need it?
+
+* pods have their own IP addresses if pods gets crashed or restarted its IP gets changes.
+* Services have stable IP 
+* users talks to service IP
+
+Example:
+Service Ip= 10.96.0.12
+Pod IP = 10.32.0.15
+
+when someone send traffic to 10.96.0.12 
+Kube-proxy:
+   * creates special network rules (called IPtables rules)
+   * These rules say:
+       If traffic comes to 10.96.0.12, send it to 10.32.0.15”
+
+*** pod to pod communication can happens but IP wont be stable so we will go always first communicates with service then pod.***
+
+**POD:**
+
+# what is pod?
+
+A pod is smallest deployable unit in kubernetes
+
+Kubernetes dose not deploy containers directly
+It wraps containers inside a pod
+
+# Why k8s used pods instead of containers?
+
+Kubernetes uses pods not containers because containers can't easily work together as a team.POds automatically handle:
+shared network
+shared storage
+same lifecycle
+Easy scaling
+
+Problem:you want nginx web server+log shipper running together
+
+**Scaling in kuberenets:**
+
+we scale pods not containers if load increases we increase pods.
+
+**why pod Abstraction is powerful:**
+
+Even if you use single container today
+
+In future:
+you can add helper container
+Add sidecar logging
+Add monitoring
+
+Pods with YAML:
+
+1. apiVersion:
+
+This field indicates the version of kubernetes API you are using. For a pod, set apiVersion:v1. Depending on the object you define we will set this.
+
+apiVersion: v1
+
+2. kind:
+
+This specifies type of object being created. In this lesson since we are creating a pod, you will define it as kind: pod. other objects might include replicaset, deployment or service.
+
+3. metadata
+
+this section defines details about object inclusing its name and labels. It is represented as dictionary
+
+apiVersion: v1
+kind: pod
+metadata:
+    name: demo
+    labels:
+        app: demo
+        type: front-end
+spec:
+    containers:
+        -   name: nginx-container
+            image: nginx
+
+4. spec:
+
+specific configuration details of object. For a pod, this is where u defines its containers. In my example using single container array has just one item. the dash indicates (-) list item and each container must be defined wit atleast name and image.
+
+Kind.           Version
+pod             v1
+deployment      apps/v1
+service         v1
+
+ku get pods
+ku descibe pod pod-name
+
+(****For indentation always use2 spaces instead of tab********)
+
+
+***LAB**:
+
+to create an image=kubectl run nginx --image=nginx
+view the pod=ubectl describe pod pod-name
+delet pod=kubectl delete pod pod-name
+
+> ## Documentation Index
+> Fetch the complete documentation index at: https://notes.kodekloud.com/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Solution Pods optional
+
+> This article provides a hands-on lab for understanding Kubernetes pods, including creation, inspection, and configuration using YAML.
+
+In this lesson, you'll explore a hands-on lab that deepens your understanding of Kubernetes pods. We'll start by checking existing pods, create new ones with various images, inspect pod details, and adjust a pod configuration using YAML.
+
+***
+
+## 1. Verify Existing Pods
+
+First, examine the current pods running in your Kubernetes cluster by executing:
+
+```bash  theme={null}
+kubectl get pods
+```
+
+You might see an output similar to this:
+
+```bash  theme={null}
+kubectl get pods
+No resources found in default namespace.
+```
+
+<Callout icon="lightbulb" color="#1CB2FE">
+  This command checks pods in the default namespace. In future lessons, we'll dive deeper into namespaces and how they manage resources.
+</Callout>
+
+***
+
+## 2. Creating a Pod with the Nginx Image
+
+To create a new pod using the Nginx image, use the following command:
+
+```bash  theme={null}
+kubectl run nginx --image=nginx
+```
+
+The pod creation is confirmed in the output:
+
+```bash  theme={null}
+pod/nginx created
+```
+
+After creating the pod, run the command again to see all current pods:
+
+```bash  theme={null}
+kubectl get pods
+```
+
+You might see a list similar to this:
+
+```bash  theme={null}
+NAME              READY   STATUS              RESTARTS   AGE
+nginx             0/1     ContainerCreating   0          17s
+newpods-llstt    0/1     ContainerCreating   0          11s
+newpods-pnnx8    0/1     ContainerCreating   0          11s
+newpods-k87fx    0/1     ContainerCreating   0          11s
+```
+
+Here, several pods have been created and will be examined further.
+
+***
+
+## 3. Inspecting Pod Details
+
+To inspect details about one of the newly created pods (for example, `newpods-llstt`), use:
+
+```bash  theme={null}
+kubectl describe pod newpods-llstt
+```
+
+This command outputs extensive information such as start time, node assignment, labels, and container details. In the section under "Containers," you should see an entry like:
+
+```text  theme={null}
+Containers:
+  busybox:
+    Container ID:   containerd://b05cd692af1f3b433883f9a8ece19ec2e8c4fcf861aa97ae6a82857ed6037a6d
+    Image:          busybox
+    ...
+```
+
+The above confirms that the image used in the pod is `busybox`.
+
+### Determine Node Placement
+
+To see which nodes are hosting your pods, run:
+
+```bash  theme={null}
+kubectl get pods -o wide
+```
+
+Sample output:
+
+```bash  theme={null}
+NAME             READY   STATUS    RESTARTS   AGE   IP              NODE           NOMINATED NODE   READINESS GATES
+SS GATES         1/1     Running   0          2m3s  10.42.0.10     controlplane   <none>           <none>
+newpods-pnnx8    1/1     Running   0          2m3s  10.42.0.12     controlplane   <none>           <none>
+newpods-llstt    1/1     Running   0          2m3s  10.42.0.11     controlplane   <none>           <none>
+newpods-k87fx    1/1     Running   0          2m3s  10.42.0.9      controlplane   <none>           <none>
+nginx            1/1     Running   0          2m9s  10.42.0.9      controlplane   <none>           <none>
+```
+
+All listed pods are running on the `controlplane` node.
+
+***
+
+## 4. Working with a Multi-Container Pod (Web App)
+
+Now consider a pod named `webapp` that includes two containers—one running the `nginx` image and the other using the `agentx` image. Check the status of the pods with:
+
+```bash  theme={null}
+kubectl get pods
+```
+
+You may observe output like the following:
+
+```bash  theme={null}
+NAME            READY   STATUS             RESTARTS   AGE
+newpods-pnnx8   1/1     Running            0          2m33s
+newpods-llstt   1/1     Running            0          2m33s
+newpods-k87fx   1/1     Running            0          2m33s
+nginx           1/1     Running            0          2m39s
+webapp          1/2     ImagePullBackOff   0          15s
+```
+
+The `READY` column uses an X/Y format, where X represents the number of containers ready, and Y is the total containers in the pod. Here, the `webapp` pod shows that while one container (`nginx`) is running, the second container (`agentx`) is not, due to an image pull error.
+
+To further inspect the `webapp` pod and diagnose the issue, run:
+
+```bash  theme={null}
+kubectl describe pod webapp
+```
+
+You'll notice that:
+
+* The `nginx` container is in a Running state.
+* The `agentx` container is in a Waiting state with the reason `ErrImagePull`, indicating that the image "agentx" could not be pulled from Docker Hub.
+
+<Callout icon="triangle-alert" color="#FF6B6B">
+  The error indicates that the Docker image `agentx` does not exist or cannot be found on Docker Hub. Verify the image name before redeploying.
+</Callout>
+
+***
+
+## 5. Deleting the Faulty Web App Pod
+
+Since the `webapp` pod has an error, remove it using:
+
+```bash  theme={null}
+kubectl delete pod webapp
+```
+
+The standard output should confirm deletion:
+
+```bash  theme={null}
+pod "webapp" deleted
+```
+
+***
+
+## 6. Creating and Modifying a Redis Pod Using a YAML Definition
+
+Next, you will create a pod named `redis` using an intentionally incorrect image (`redis123`) to simulate an error scenario. Although you can use `kubectl run` to create a pod, it's recommended to define it with a YAML file for better control and maintainability.
+
+### Generating and Applying a YAML File
+
+First, generate the YAML definition using a dry run:
+
+```bash  theme={null}
+kubectl run redis --image=redis123 --dry-run=client -o yaml > redis.yaml
+```
+
+The generated `redis.yaml` file looks like this:
+
+```yaml  theme={null}
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: redis
+  name: redis
+spec:
+  containers:
+  - image: redis123
+    name: redis
+  resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+```
+
+Create the pod from the YAML file:
+
+```bash  theme={null}
+kubectl create -f redis.yaml
+```
+
+Check the pod status:
+
+```bash  theme={null}
+kubectl get pods
+```
+
+Expected output is similar to:
+
+```bash  theme={null}
+NAME             READY   STATUS         RESTARTS   AGE
+newpods-pnnx8    1/1     Running        0          8m16s
+newpods-llstt    1/1     Running        0          8m16s
+newpods-k87fx    1/1     Running        0          8m16s
+nginx            1/1     Running        0          8m22s
+redis            0/1     ErrImagePull   0          10s
+```
+
+Because the image name is incorrect, the `redis` pod is in an `ErrImagePull` state.
+
+### Updating the YAML to Correct the Image
+
+To fix this error, edit the `redis.yaml` file to use the correct image name. Replace `redis123` with `redis`:
+
+```yaml  theme={null}
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: redis
+  name: redis
+spec:
+  containers:
+  - image: redis
+    name: redis
+  resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+```
+
+Apply the updated configuration:
+
+```bash  theme={null}
+kubectl apply -f redis.yaml
+```
+
+You might see a warning regarding a missing annotation, which is normal when applying changes to imperatively created resources.
+
+Finally, verify that the pod is running:
+
+```bash  theme={null}
+kubectl get pods
+```
+
+An expected output would be:
+
+```bash  theme={null}
+NAME             READY   STATUS    RESTARTS   AGE
+newpods-pnnx8    1/1     Running   0          9m38s
+newpods-llstt    1/1     Running   0          9m38s
+newpods-k87fx    1/1     Running   0          9m38s
+nginx            1/1     Running   0          9m38s
+redis            1/1     Running   0          92s
+```
+
+This confirms that the corrected pod is now in a running state.
+
+***
+
+_______________________________________
+🆚 kubectl create vs kubectl apply
+🔵 kubectl create
+👉 Creates a resource only once
+* It fails if the resource already exists
+* It does not track future changes
+Example:
+
+kubectl create -f pod.yaml
+
+* If demo pod already exists ❌ → error
+* You must delete and recreate to change it
+
+🟢 kubectl apply
+👉 Creates OR updates (smart way)
+* If resource doesn’t exist → ✅ creates it
+* If it exists → ✅ updates it
+* Tracks changes over time
+Example:
+
+kubectl apply -f pod.yaml
+
+* Change image → run again → it updates automatically
+
+kubectl run nginx --image=nginx
+
+==========================================
+
+## Conclusion
+
+In this lab, you learned how to:
+
+* Verify the current pod count.
+* Create new pods using different images.
+* Inspect detailed pod configurations with `kubectl describe`.
+* Understand the significance of the `READY` column.
+* Delete faulty pods.
+* Define and modify pod configurations using YAML.
+
+These practical exercises provide a solid foundation for working with pods in Kubernetes. Happy learning and explore further to master Kubernetes operations!
+
+***
+
+<CardGroup>
+  <Card title="Watch Video" icon="video" cta="Learn more" href="https://learn.kodekloud.com/user/courses/cka-certification-course-certified-kubernetes-administrator/module/c6d2ac7d-8192-4cff-aa54-e36d888c5bd9/lesson/b7461b35-9ba1-4d83-afb8-b2bf9db7d9ae" />
+</CardGroup>
+ 
+
+**Replication controller:**
+
+ Replication controller we are not using anymore we use replicasets mostly.
+
+ Commands:
+
+ kubectl create -f repliacset-defination.yaml
+
+ kubectl scale --replicas=3 -f replicaset-defination.yaml
+
+ kubectl get replicset
+
+ kubect delete replicaset replicaset-defination.yaml
+
+ **Deployments:**
+
+&&& A KING MADE SPECIAL CONTAINER &&&&
+
+apiversion: apps/v1
+kind: Deployment
+metadata:
+  name: demo
+  type: front-end
+
+spec:
+  replicas: 2
+  template:
+    spec:
+      comtainers:
+        - name: busy-box
+          image: nginx
+
+ku create deployment.yaml
+kubectl get deployments
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo
+spec:
+  replicas: 3
+  selector:
+    matchlabels:
+      app: demo
+  template:
+    metadata:
+      labels:
+        app: demo
+    spec:
+      containers:
+        - name: demo-image
+          image: nginx
+
+> ## Documentation Index
+> Fetch the complete documentation index at: https://notes.kodekloud.com/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Solution Deploymentoptional
+
+> This guide introduces Kubernetes deployments and explains how to verify the environment and troubleshoot deployment issues.
+
+In this guide, we introduce Kubernetes deployments by first examining the current environment state before any deployment is created.
+
+## Environment Verification
+
+Start by checking how many pods exist on the system with the command:
+
+```bash  theme={null}
+kubectl get pods
+```
+
+Output:
+
+```plaintext  theme={null}
+No resources found in default namespace.
+```
+
+Next, verify the number of ReplicaSets:
+
+```bash  theme={null}
+kubectl get rs
+```
+
+Output:
+
+```plaintext  theme={null}
+No resources found in default namespace.
+```
+
+Finally, check the existing deployments:
+
+```bash  theme={null}
+kubectl get deployments
+```
+
+Output:
+
+```plaintext  theme={null}
+No resources found in default namespace.
+```
+
+At this point, the environment is clean—no pods, ReplicaSets, or deployments are present.
+
+Some changes are then applied. Rechecking the deployments now shows that one deployment has been created:
+
+```bash  theme={null}
+kubectl get deployments
+```
+
+Output:
+
+```plaintext  theme={null}
+NAME                    READY   UP-TO-DATE   AVAILABLE   AGE
+frontend-deployment     0/4     4            0           10s
+```
+
+Next, inspect the ReplicaSets:
+
+```bash  theme={null}
+kubectl get rs
+```
+
+Output:
+
+```plaintext  theme={null}
+NAME                              DESIRED   CURRENT   READY   AGE
+frontend-deployment-7f8dcd896       4         4         0       35s
+```
+
+And finally, list the pods:
+
+```bash  theme={null}
+kubectl get pods
+```
+
+Output:
+
+```plaintext  theme={null}
+NAME                                                     READY   STATUS             RESTARTS   AGE
+frontend-deployment-7f8dcd896-stmbx                      0/1     ImagePullBackOff   0          59s
+frontend-deployment-7f8dcd896-zc6wc                      0/1     ErrImagePull       0          59s
+frontend-deployment-7f8dcd896-jgcbx                      0/1     ErrImagePull       0          59s
+frontend-deployment-7f8dcd896-jbr44                      0/1     ErrImagePull       0          59s
+```
+
+None of the four pods are ready. To investigate further, inspect one of the pods in detail:
+
+```bash  theme={null}
+kubectl describe pod frontend-deployment-7f8dcd896-stmbx
+```
+
+Within the detailed output, you will notice that the image used is "busybox888" (visible under the “Pulling image” events). Key excerpts from the `describe` output include:
+
+```plaintext  theme={null}
+State:          Waiting
+Reason:         ErrImagePull
+...
+Pulling image "busybox888"
+Warning   Failed      ...   Failed to pull image "busybox888": rpc error: code = Unknown desc = failed to pull and unpack image "docker.io/library/busybox888:latest": pull access denied, repository does not exist or may require authorization: server response: authorization failed
+Warning   Failed      ...   Error: ErrImagePull
+Normal    BackOff     ...   Back-off pulling image "busybox888"
+```
+
+<Callout icon="triangle-alert" color="#FF6B6B">
+  The image "busybox888" does not exist, which is why the pods are not becoming ready. Verify and update your image name as needed.
+</Callout>
+
+***
+
+## Creating a Deployment Using a YAML Definition
+
+The next task is to create a new deployment using a YAML file. In your root directory, verify the YAML file presence:
+
+```bash  theme={null}
+controlplane ~  pwd
+/root
+controlplane ~  ls
+deployment-definition-1.yaml  sample.yaml
+```
+
+Then, attempt to create the deployment by executing:
+
+```bash  theme={null}
+kubectl create -f deployment-definition-1.yaml
+```
+
+You might encounter an error similar to this:
+
+```plaintext  theme={null}
+Error from server (BadRequest): error when creating "deployment-definition-1.yaml": deployment in version "v1" cannot be handled as a Deployment: no kind "deployment" is registered for version "apps/v1" in scheme "k8s.io/apimachinery/v1.23.3-k3s1/pkg/runtime/schema.go:100"
+```
+
+Upon inspecting the file, you could notice that although the API version is correctly set to `apps/v1`, the kind is mistakenly written in lowercase. The `kind` field is case sensitive and must start with an uppercase letter.
+
+Below is the corrected YAML definition:
+
+```yaml  theme={null}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: busybox-pod
+  template:
+    metadata:
+      labels:
+        name: busybox-pod
+    spec:
+      containers:
+        - name: busybox-container
+          image: busybox888
+          command:
+            - sh
+            - "-c"
+            - echo Hello Kubernetes! && sleep 3600
+```
+
+After correcting the `kind` field, save the file and run:
+
+```bash  theme={null}
+kubectl create -f deployment-definition-1.yaml
+```
+
+If the file is corrected properly, the deployment will be created successfully.
+
+***
+
+## Creating a Deployment via the Command Line
+
+An alternative method is to create a deployment directly from the command line by specifying the name, image, and number of replicas. For example, to create an HTTP frontend deployment with three replicas using a specific image, run:
+
+```bash  theme={null}
+kubectl create deployment http-frontend --image=<your-httpd-image> --replicas=3
+```
+
+It is a good practice to verify the newly created deployment immediately:
+
+```bash  theme={null}
+kubectl get deploy
+```
+
+You should see the new `http-frontend` deployment listed, and eventually, the pods should transition to a ready state.
+
+***
+
+## Summary
+
+This lesson demonstrated how to:
+
+* Check the environment for existing pods, ReplicaSets, and deployments.
+* Troubleshoot a deployment issue caused by an incorrect image.
+* Correctly create a deployment using a YAML definition.
+* Create a deployment directly from the command line.
+
+<Callout icon="lightbulb" color="#1CB2FE">
+  Ensuring correct syntax and case sensitivity in your Kubernetes YAML files is crucial to avoid deployment errors.
+</Callout>
+
+By following these steps, you will strengthen your understanding of Kubernetes deployments and develop the skills to quickly troubleshoot and resolve common issues.
+
+<CardGroup>
+  <Card title="Watch Video" icon="video" cta="Learn more" href="https://learn.kodekloud.com/user/courses/cka-certification-course-certified-kubernetes-administrator/module/c6d2ac7d-8192-4cff-aa54-e36d888c5bd9/lesson/bab0855f-cbd7-4a57-909b-a19dec777eba" />
+</CardGroup>
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deployment
+  labels:
+    app: myapp
+    type: front-end
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      type: front-end
+  template:
+    metadata:
+      labels:
+        app: myapp
+        type: front-end
+    spec:
+      containers:
+        - name: nginx-container
+          image: nginxs
+
+
+  --------------
+
+
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: myapp-deployment
+  labels:
+    app: myapp
+    type: front-end
+
+spec:
+  replicas: 3
+
+  selector:
+    matchLabels:
+      app: myapp
+
+  template:
+    metadata:
+      labels:
+        app: myapp
+        type: front-end
+
+    spec:
+      containers:
+        - name: nginx-container
+          image: nginx
+
+          ports:
+            - containerPort: 80
+
+          env:
+            - name: ENV
+              value: "production"
+            - name: APP_VERSION
+              value: "v1"
+
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+
+🔍 Step-by-step meaning
+1️⃣ Selector (who should I manage?)
+selector:
+  matchLabels:
+    app: myapp
+👉 Manager says:
+“I will manage only workers with app: myapp badge”
+2️⃣ Template (create new workers like this)
+template:
+  metadata:
+    labels:
+      app: myapp
+      type: front-end
+👉 Manager creates new workers with:
+app: myapp ✅ (important)
+type: front-end (extra info)
+🔗 How they connect
+👉 Because both have:
+
+
+=====================================================
+**Services:**
+
+Services allows different pods to communicate each other. to connect front-end to back-end services or integrating external data resources we need this.
+
+Why do we need it:
+
+. Apps runs inside the pod
+. POds can die and restart any time
+. when they restart their pod ip also changes
+
+**Types of loadbalancer:**
+
+1. Cluster IP(default)
+only Inside kubernetes cluster
+Used for Internal communocation
+
+2. NodePort(range=30000-32767)
+Exposes app on port on each node
+we can acces using:
+NodeIP: port
+
+3. Loadbalancer:
+Creates cloud load balancer
+Used in AWS, Azure, GCP
+Best for production
+
+apiVerion: v1
+kind: Service
+metadata:
+  name: demo-svc
+spec:
+  type: NodePort
+  ports:
+   - targetPort: 80
+     port: 80
+     nodePort: 3000
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  type: NodePort
+  ports:
+    - targetPort: 80//backend is exposed
+      port: 80//service is exposed
+      nodePort: 30008
+  selector:
+    app: myapp
+    type: front-end
+
+    kubectl create service-defination.yaml
+
+    kubectl get services
+
+    vi service.yaml
+    ++++++++++++++++++++++++++++
+
+**Namespaces:**
+
+
+Namespaces allows you to distinct policies and resources to different environments.
+
+to view default namesapce pods we can view here:
+kubectl get pods
+
+kubectl get pods --namespace=kube-system
+
+vi pod-defination.yaml
+
+apiVersion:v1
+kind: Namespace
+metadata:
+  name: dev
+
+kubectl create -f pod-defination.yaml 
+
+kubectl create -f pod-defination.yaml --nmaespace=dev
+
+kubectl create namespace dev
+
+ubectl get namespace --namespace=all
+
+==================
+Imperative commands:
+
+****. kubectl <action> <object> <name> <extra-options>   ****
+
+AONE====remember trick
+
+| Letter | Means  | Example                    |
+| ------ | ------ | -------------------------- |
+| A      | Action | create / run / expose      |
+| O      | Object | pod / deployment / service |
+| N      | Name   | nginx / myapp              |
+| E      | Extra  | image / port / replicas    |
+
+kubectl run nginx --image=nginx
+kubectl create deployment --image=nginx nginx
+kubectl expose deployment nginx-dep --port=80 --type=NodePort
+kubectl scale deployment nginx-dep --replicas=3
+kubectl delete pod nginx
+kubectl delete deployment nginx-dep
+kubectl delete svc nginx-dep
+kubectl edit deployment nginx-dep
+kubectl get pods
+kubectl get deploy
+kubectl get svc
+kubectl get all
+kubectl create deployment nginx --image=nginx --dry-run=client -o yaml(to view yaml)
+
+kubectl api-resources. (its shows everything we have in namespace like dameonsets and shortscuts for each one)
+
+
+
+kubectl run redis -l tier=db --image=redis:alpine
+
+kubectl expose pod redis --port=6379 --name=redis-service --type=ClusterIP
+
+kubectl create deployment  webapp --image=kodekloud/webapp-color --replicas=3
+
+**Manual Scheduling:**
+
+Every pod defination can have field named as nodeName which is set default.
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo
+  labels:
+    name: demo
+spec:
+  nodeName: node02
+  containers:
+    - name: nginx
+      image: nginx
+      ports:
+        - containerPort: 8080
+
+  kubectl get pods
+
+  **Labels and selectors:**
+
+  Labels is a tag attached to pod.
+
+  labels:
+    app: pizza
+
+  Selectors is used by service to find pods
+  
+  selector:
+    app: pizza
+
+    kubectl get pods --selector env=dev
+
+**Taints and tolerations:**
+
+    Taints=nodes
+    tolerations=onpods
+
+
+Both taints and tolerations in kubernetes for scheduling.
+
+Example: Consider a simple cluster with three worker nodes (node one, two, and three) and four pods (A, B, C, and D). By default, without any taints or tolerations, the scheduler distributes the pods evenly across all nodes.
+Suppose you want to dedicate node one to a specific application:
+First, taint node one (using, for example, the key-value pair “app=blue”) so that no pods are scheduled there by default.
+Then, add an appropriate toleration to the dedicated pod (Pod D) so that it alone can run on node one.
+
+When the scheduler assigns pods:
+Pod A, lacking a toleration, will be scheduled on node two.
+Pod B is repelled from node one and lands on node three.
+Pod C, without a matching toleration, is scheduled on node two or three.
+Pod D, having the correct toleration, is scheduled on node one.
+
+**Tainting a node:**
+
+kubectl taints nodes node-name key=value:taint-effect
+
+kubectl taint nodes node1 app=blue:NoSchedule
+
+🔴 1. NoSchedule
+👉 New pods will NOT be scheduled here
+🎯 Use case:
+You have a GPU node and you don’t want normal apps running there.
+
+Step 1 — Taint the Node
+
+kubectl taint nodes node1 gpu=true:NoSchedule
+Meaning:
+❌ "Don’t schedule any pod on this GPU node unless it has permission."
+
+Step 2 — Normal Pod (Without toleration)
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: normal-pod
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+➡️ This pod WILL NOT be scheduled on node1
+
+Step 3 — GPU Pod (With toleration)
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gpu-pod
+spec:
+  containers:
+  - name: cuda
+    image: nvidia/cuda
+  tolerations:
+  - key: "gpu"
+    value: "true"
+    effect: "NoSchedule"
+➡️ Now this pod CAN run on node1
+
+🟡 2. PreferNoSchedule
+👉 Try to avoid… but if needed, okay
+🎯 Use case:
+You have a spot instance node (cheap but unstable)
+You prefer not to run important pods here…but if cluster is full → fine, use it.
+
+Step 1 — Taint the Node
+
+kubectl taint nodes node2 spot=true:PreferNoSchedule
+Meaning:
+🙏 "Please avoid scheduling pods here if possible."
+
+Step 2 — Normal Pod (No toleration)
+Scheduler behaviour:
+* If other nodes are free → pod goes there ✅
+* If cluster is full → pod may run on node2 😅
+So this is soft restriction
+
+Step 3 — Pod with toleration
+
+tolerations:
+- key: "spot"
+  value: "true"
+  effect: "PreferNoSchedule"
+➡️ Scheduler now happily schedules here.
+
+🔵 3. NoExecute
+👉 Don't schedule new pods AND remove existing pods
+This one is dangerous 🚨
+
+🎯 Use case:
+Node becomes unhealthy or under maintenance.
+
+Step 1 — Apply taint
+
+kubectl taint nodes node3 maintenance=true:NoExecute
+Now:
+* New pods ❌ NOT scheduled
+* Existing pods ❌ REMOVED immediately
+
+Step 2 — Pod WITHOUT toleration
+Running pods on node3 will be:
+➡️ Evicted immediately
+
+Step 3 — Pod WITH toleration (stay for some time)
+
+tolerations:
+- key: "maintenance"
+  value: "true"
+  effect: "NoExecute"
+  tolerationSeconds: 60
+Meaning:
+"I can stay on this node for 60 seconds before eviction."
+After 60 sec → pod removed.
+
+**Node selectors:**
+
+Its simplest way to choose a node for your pod
+
+Example:
+
+Suppose you have 3 nodes:
+
+Node1->label:disk=ssd
+Node2->label:disk=hsd
+Node3->label:disk=bsd
+
+Now you want your pod to run on specific node with label:ssd
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  nodeSelector:
+    disk: ssd
+  containers:
+  - name: nginx
+    image: nginx
+
+✅ What happens?
+Kubernetes checks:
+“Which node has label disk=ssd?”
+It finds Node 1 and Node 3.
+It schedules Pod on one of them.
+
+If pod did not get sepcific node with that label it keeps checking it will be in pending state.
+
+
+**Node Affinity:**
+
+It is more powerful version of node selector.
+
+It allows you to use:
+
+Use more conditions
+use AND/OR logic
+say "must match " or "preferred"
+
+Two types of node affinity:
+
+1. Required:(Hard Rule)
+Pod must run on matching node
+
+2. Preferred(Soft rule)
+Pod tries to run here if not exist it can run elsewhere
+
+# Example 1: Required (Hard Rule)
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: disk
+            operator: In
+            values:
+            - ssd
+  containers:
+  - name: nginx
+    image: nginx
+
+Meaning:
+Node must have disk=ssd
+If no ssd node->pod will not run
+
+# Example 2: Preferred (Soft Rule)
+
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 1
+      preference:
+        matchExpressions:
+        - key: disk
+          operator: In
+          values:
+          - ssd
+Meaning:
+Try SSD node first
+If not availabel-use any node
+
+
+| Feature          | Taints & Tolerations | Node Affinity          |
+| ---------------- | -------------------- | ---------------------- |
+| Who controls?    | Node controls        | Pod controls           |
+| Purpose          | Repel unwanted pods  | Attract specific nodes |
+| Default behavior | Blocks pods          | Just selects nodes     |
+| Main use         | Dedicated nodes      | Workload placement     |
+
+
+**Resource Limits:**
+
+1️⃣ What Are “Requests” and “Limits”?
+* requests → Minimum resources your container must get
+* limits → Maximum resources your container can use
+Think like this:
+Type	Meaning
+request	Guaranteed amount
+limit	Maximum allowed
+
+🔹 2️⃣ Example: How to Define CPU & Memory
+Here is a simple Deployment example:
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: nginx
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+
+🔹 3️⃣ What Do These Values Mean?
+CPU Values
+* 1000m = 1 CPU core
+* 500m = 0.5 CPU
+* 200m = 0.2 CPU
+👉 m means millicpu
+
+Memory Values
+* Mi = Mebibytes
+* Gi = Gibibytes
+Examples:
+* 256Mi ≈ 256 MB
+* 1Gi = 1024 Mi
+
+✅ Correct Order to Configure
+Always set in this order:
+
+1️⃣ Set Requests & Limits
+2️⃣ Then Configure HPA
+3️⃣ Probes are independent
+
+**Daemon sets:**
+
+Daemon set ensures that every pod run on each node in cluster.
+
+🧠 Simple Example
+Imagine you have 5 computers (nodes) in your Kubernetes cluster.
+If you create a Deployment → maybe 3 pods run anywhere.
+But if you create a DaemonSet →
+✔ 1 pod runs on Node 1✔ 1 pod runs on Node 2✔ 1 pod runs on Node 3✔ 1 pod runs on Node 4✔ 1 pod runs on Node 5
+
+If we remove node pod also removed in that node
+
+📊 1️⃣ Log Collection (Very Common Use)
+🧠 Problem:
+Every node generates logs:
+* Application logs
+* System logs
+* Container logs
+We need to collect all logs and send them to one central place.
+✅ Solution:
+Run one log collector on every node.
+Popular tools:
+Fluentd
+Filebeat
+🔎 How It Works:
+Each node:
+* Runs one Fluentd pod
+* Collects logs from that node
+* Sends logs to Elasticsearch / server
+👉 Without DaemonSet, some nodes may not send logs.
+
+📡 2️⃣ Monitoring (CPU, Memory Check)
+🧠 Problem:
+We want to monitor:
+* CPU usage
+* Memory usage
+* Disk usage
+* Network traffic
+Each node has different usage.
+✅ Solution:
+Install one monitoring agent on every node.
+Popular tool:
+* Prometheus (uses node exporters)
+
+🔎 Example:
+Each node runs:
+* 1 monitoring pod
+* It sends metrics to Prometheus server
+If Node 3 CPU becomes 95%:👉 Monitoring agent reports it.
+
+🌐 3️⃣ Network Plugins
+🧠 Problem:
+Kubernetes networking must work on every node.
+Every node must:
+* Handle pod IP
+* Connect pods across nodes
+✅ Solution:
+Install network plugin on every node.
+Popular examples:
+* Calico
+* Flannel
+🔎 Why DaemonSet?
+Because networking must exist on:
+
+Node1
+Node2
+Node3
+All nodes!
+If one node doesn’t have network plugin → pods won’t communicate.
+
+🔒 4️⃣ Security Agents
+🧠 Problem:
+We want to:
+* Scan containers for threats
+* Detect suspicious activity
+* Monitor system calls
+Each node must be protected.
+✅ Solution:
+Run one security agent per node.
+Example tools:
+* Falco
+* Aqua Security
+
+If malware runs on Node2:👉 Security pod on Node2 detects it.
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nginx-daemonset
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx
+        ports:
+        - containerPort: 80
+
+
+**STATIC PODS:**
+
+What are Static Pods in Kubernetes?
+Static Pods are pods that are directly managed by the kubelet on a specific node, not by the Kubernetes API server or controllers.
+Think of it like this 👇
+* Normally:You create a Pod → Kubernetes API server manages it.
+* Static Pod:You place a Pod YAML file on the node itself → the kubelet automatically creates and runs the Pod.
+So the pod is tied to that specific machine (node).
+
+Simple Example
+Suppose you put this file on the node:
+
+/etc/kubernetes/manifests/nginx.yaml
+
+The kubelet watches this folder.
+When it sees the file, it automatically creates the pod.
+If you delete the file → the pod also stops.
+
+Key Points (Very Easy)
+✅ Created by kubelet directly✅ YAML file stored on the node✅ Not managed by API server✅ Runs only on that node✅ If file removed → pod deleted
+
+Real Use in Kubernetes
+Important system components run as static pods, like:
+* kube-apiserver
+* kube-scheduler
+* kube-controller-manager
+* etcd
+These are usually stored in:
+
+/etc/kubernetes/manifests/
+
+
+Quick Diagram
+
+Normal Pod
+User → API Server → Scheduler → Node → Pod
+
+Static Pod
+YAML file on Node → Kubelet → Pod
+
+Static Pods vs. DaemonSets
+A common question that arises is how static pods differ from DaemonSets. The table below summarizes the key differences between the two:
+
+| Feature | Static Pods | DaemonSets |
+|--------|-------------|------------|
+| Creation Source | Directly managed by the kubelet | Managed by the DaemonSet controller via the kube-apiserver |
+| Control Plane Involvement | No API server interaction | Requires kube-apiserver communication |
+| Use Case | Typically used for critical control plane components | Ensures a copy of a pod runs on every node |
+| Interaction with Scheduler | Ignored by the kube-scheduler | Ignored by the kube-scheduler |
+
+
+**PRIORITY CLASS**
+
+In Kubernetes, Priority Classes decide which pods are more important than others when the cluster does not have enough resources (CPU/RAM).Think of it like VIP seating in a movie theatre 🎬.
+
+1️⃣ Simple Analogy (Movie Theatre)
+Imagine a theatre with limited seats:
+* VIP ticket holders → always get seats first
+* Regular ticket holders → get seats if seats remain
+* If VIPs arrive and the theatre is full, some regular people may be asked to leave
+In Kubernetes:
+* VIPs = High priority pods
+* Regular = Low priority pods
+* Kubernetes may stop (evict) low-priority pods to run important ones.
+This process is called Preemption.
+
+2️⃣ Why Priority Classes Are Used
+Priority classes help when:
+* Cluster resources are limited
+* Some applications are more critical
+Example:
+Application	Priority
+Database	High
+Payment service	High
+Monitoring	Medium
+Test jobs	Low
+
+If resources run out, test jobs may be removed first.
+
+3️⃣ How Priority Class Works
+A PriorityClass object gives a numeric value to priority.
+Example:
+
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: high-priority
+value: 1000
+globalDefault: false
+description: "High priority pods"
+
+Meaning:
+* Pods using high-priority get value 1000
+* Higher number = higher priority
+
+4️⃣ Using Priority Class in a Pod
+Example pod:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: important-app
+spec:
+  priorityClassName: high-priority
+  containers:
+  - name: app
+    image: nginx
+
+Now this pod is more important than normal pods.
+
+5️⃣ What Happens When Cluster Is Full
+Case:
+1. Low-priority pod running
+2. High-priority pod comes
+3. No resources available
+➡ Kubernetes removes low-priority pod➡ Runs high-priority pod
+This is preemption.
+
+✅ In one line:Priority Classes tell Kubernetes which pods are more important so they get resources first.
+
+
+
+In Kubernetes, Preemption Policy decides whether a high-priority pod is allowed to remove (evict) lower-priority pods to get resources.
+Think of it as permission to kick someone out of the seat.
+
+1️⃣ Simple Example
+Imagine a flight ✈️
+* Business class passenger arrives
+* Economy seats are full
+* Airline may upgrade or move someone to make space
+But sometimes the airline policy may say no passenger can be removed.
+That rule = Preemption Policy.
+
+2️⃣ Two Preemption Policy Options
+1. PreemptLowerPriority (Default)
+High-priority pods can remove lower-priority pods.
+Example:
+* Cluster full
+* Low priority pod running
+* High priority pod scheduled
+➡ Kubernetes evicts low priority pod➡ High priority pod runs
+
+2. Never
+High-priority pods cannot evict other pods.
+Example:
+* Cluster full
+* High priority pod arrives
+* Policy = Never
+➡ Pod waits in Pending state➡ No pods are removed
+
+3️⃣ Example Pod with Preemption Policy
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: important-app
+spec:
+  priorityClassName: high-priority
+  preemptionPolicy: Never
+  containers:
+  - name: app
+    image: nginx
+
+Meaning:
+* Pod has high priority
+* But cannot evict other pods
+
+4️⃣ Quick Comparison
+Feature	What it does
+PriorityClass	Decides importance of pods
+PreemptionPolicy	Decides if lower pods can be evicted
+
+5️⃣ Real Production Example
+Example cluster:
+Service	Priority	Policy
+Payment service	High	PreemptLowerPriority
+Monitoring	Medium	PreemptLowerPriority
+Batch jobs	Low	—
+ML training job	High	Never
+
+4️⃣ Real-World Recommendation (Very Important)
+Instead of random numbers, use clear gaps:
+Class	Value
+Low	100
+Medium	1000
+High	10000
+Critical	100000
+
+
+🚪 **Admission Controllers in Kubernetes (Complete Guide)**
+🔹 What exactly are they?
+👉 Admission Controllers = filters that run AFTER authentication & authorization, BEFORE object is stored
+They:
+* Validate requests
+* Modify requests
+* Enforce policies
+
+🔹 Full Request Flow (Very Important 🔥)
+
+kubectl apply -f pod.yaml
+        ↓
+Authentication (Who are you?)
+        ↓
+Authorization (Are you allowed?)
+        ↓
+👉 Admission Controllers (THIS TOPIC)
+        ↓
+Object stored in etcd
+
+
+🔹 Two Types (Core Concept)
+1️⃣ Mutating Admission Controllers
+👉 They modify the request
+Example
+You create a Pod without limits:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+  - name: app
+    image: nginx
+
+👉 After mutation (by LimitRanger):
+
+containers:
+- name: app
+  image: nginx
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+💡 Kubernetes automatically adds defaults
+
+2️⃣ Validating Admission Controllers
+👉 They ONLY check and approve/reject
+Example
+
+containers:
+- name: app
+  image: nginx
+  securityContext:
+    privileged: true
+
+👉 PodSecurity says:❌ "Privileged containers not allowed"
+👉 Result:
+
+Error: forbidden
+
+
+🔹 Built-in Admission Controllers (Important List)
+🔸 1. NamespaceLifecycle
+👉 Prevents operations in deleted namespaces
+Example:
+* You try to create Pod in terminating namespace → ❌ rejected
+
+🔸 2. LimitRanger
+👉 Applies default limits
+Example:
+* No CPU defined → auto adds CPU
+
+🔸 3. ServiceAccount
+👉 Automatically assigns service account
+Example:
+
+spec:
+  serviceAccountName: default
+
+
+🔸 4. ResourceQuota
+👉 Enforces limits per namespace
+Example quota:
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: quota
+spec:
+  hard:
+    pods: "2"
+
+👉 If you create 3rd pod:❌ rejected
+
+🔸 5. PodSecurity (VERY IMPORTANT 🔥)
+👉 Replaces old PodSecurityPolicy (PSP)
+Levels:
+* privileged
+* baseline
+* restricted
+Example:
+
+metadata:
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+
+👉 Blocks:
+* root containers
+* privileged mode
+
+🔥 Webhook Admission Controllers (MOST IMPORTANT FOR REAL WORLD)
+🔹 What are they?
+👉 You can write your own logic using HTTP services
+Types:
+* MutatingAdmissionWebhook
+* ValidatingAdmissionWebhook
+
+🔹 Example Use Cases
+* Inject sidecars (Istio)
+* Block untrusted images
+* Enforce labels
+* Restrict namespaces
+
+🔹 Example: Validating Webhook
+Step 1: Rule
+👉 "Only allow images from company registry"
+
+Step 2: Webhook YAML
+
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: validate-images
+webhooks:
+- name: validate.k8s.io
+  rules:
+  - apiGroups: [""]
+    apiVersions: ["v1"]
+    operations: ["CREATE"]
+    resources: ["pods"]
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: default
+      path: "/validate"
+  admissionReviewVersions: ["v1"]
+  sideEffects: None
+
+
+Step 3: Logic (Pseudo-code)
+
+if not image.startswith("mycompany/"):
+    reject()
+
+👉 Result:
+* nginx → ❌ rejected
+* mycompany/nginx → ✅ allowed
+
+🔹 Example: Mutating Webhook
+👉 Auto-add sidecar container
+Before:
+
+containers:
+- name: app
+  image: nginx
+
+After mutation:
+
+containers:
+- name: app
+  image: nginx
+- name: sidecar
+  image: logging-agent
+
+
+🔹 Order of Execution (Important)
+1. Mutating controllers run first
+2. Then validating controllers
+👉 Flow:
+
+Request
+ → Mutate (modify)
+ → Validate (check)
+ → Store
+
+
+🔹 How to Enable Admission Controllers
+In kube-apiserver:
+
+--enable-admission-plugins=LimitRanger,ResourceQuota,PodSecurity
+
+
+🔹 Real-world Example Scenario
+👉 Company rule:
+* All pods must have:
+    * labels
+    * resource limits
+    * approved images
+👉 Solution:
+* LimitRanger → adds defaults
+* ResourceQuota → restrict usage
+* PodSecurity → enforce security
+* Webhook → enforce company rules
+
+**Managing Application Logs**
+
+🚀 1. Create project
+oc new-project logging-demo
+🧪 2. Run event simulator pod
+oc run event-simulator --image=kodekloud/event-simulator --restart=Never
+🔍 3. View logs
+oc logs event-simulator
+🔴 4. Live logs (most important)
+oc logs -f event-simulator
+🧱 5. Create multi-container pod (one-liner)
+oc apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: multi-pod
+spec:
+  containers:
+  - name: event-simulator
+    image: kodekloud/event-simulator
+  - name: nginx
+    image: nginx
+EOF
+🔍 6. Logs from specific container
+oc logs multi-pod -c event-simulator
+oc logs multi-pod -c nginx
+🧹 7. Cleanup
+oc delete pod event-simulator multi-pod
+
+
+📘 **Rolling Updates & Rollbacks (OpenShift / OC) — Easy Notes**
+
+
+🔹 1. Rollout & Revision (Same in OpenShift)
+* When you create deployment → rollout starts
+* First version → Revision 1
+* After update → Revision 2
+👉 OpenShift tracks versions automatically
+
+✅ Check rollout status
+
+oc rollout status deployment/myapp
+
+✅ See rollout history
+
+oc rollout history deployment/myapp
+
+
+🔹 2. Deployment Strategies
+🟥 Recreate
+* Deletes all old pods
+* Then creates new pods
+❌ App DOWN (downtime)
+
+🟩 Rolling Update (DEFAULT)
+* Updates pods one by one
+✅ No downtime✅ Safe
+
+🔹 3. Create Deployment (OC Example)
+
+oc create deployment myapp --image=nginx:1.7.0
+
+👉 Check:
+
+oc get pods
+
+
+🔹 4. Update Deployment (IMPORTANT)
+✅ Method 1: Update image
+
+oc set image deployment/myapp nginx=nginx:1.9.1
+
+👉 This triggers:
+* New rollout
+* New revision
+
+✅ Check rollout
+
+oc rollout status deployment/myapp
+
+
+🔹 5. View Details
+
+oc describe deployment myapp
+
+👉 Shows:
+* Strategy
+* ReplicaSets
+* Events
+
+🔹 6. Real Example (STEP-BY-STEP 🔥)
+Step 1: Create deployment
+
+oc create deployment myapp --image=nginx:1.7.0
+
+
+Step 2: Expose service (optional)
+
+oc expose deployment myapp --port=80
+
+
+Step 3: Update image (simulate upgrade)
+
+oc set image deployment/myapp nginx=nginx:1.9.1
+
+👉 What happens:
+* New pods start
+* Old pods slowly stop
+* No downtime
+
+Step 4: Watch rollout
+
+oc rollout status deployment/myapp
+
+
+Step 5: Check history
+
+oc rollout history deployment/myapp
+
+👉 Output shows:
+* Revision 1 → nginx:1.7.0
+* Revision 2 → nginx:1.9.1
+
+🔹 7. Rollback (VERY IMPORTANT)
+👉 If update fails
+
+oc rollout undo deployment/myapp
+
+👉 What happens:
+* New pods deleted
+* Old pods restored
+
+Check again:
+
+oc get pods
+
+
+🔹 8. Check ReplicaSets
+
+oc get rs
+
+👉 You will see:
+* Old version RS
+* New version RS
+
+🔹 9. Quick Command Revision
+Task	OC Command
+Create deployment	oc create deployment myapp --image=nginx
+Get deployments	oc get deployments
+Update image	oc set image deployment/myapp nginx=nginx:1.9.1
+Check rollout	oc rollout status deployment/myapp
+Rollback	oc rollout undo deployment/myapp
+History	oc rollout history deployment/myapp
+🔹 10. SUPER SIMPLE FLOW 🧠
+1. Create deployment
+2. Update image → rollout starts
+3. New version created
+4. If issue → rollback
+
+🔥 Final Real-Life Example (CRC)
+
+# Create
+oc create deployment webapp --image=nginx:1.7.0
+
+# Update
+oc set image deployment/webapp nginx=nginx:1.9.1
+
+# Check rollout
+oc rollout status deployment/webapp
+
+# See history
+oc rollout history deployment/webapp
+
+# Rollback if error
+oc rollout undo deployment/webapp
+
+
+⭐ Exam / Interview Tips
+* Default strategy → Rolling Update
+* Rollout = deployment update
+* Revision = version
+* Rollback = go back to old version
+* OpenShift uses same Kubernetes logic
+
+
+🧠 **OC/CRC: Kubernetes Commands & Arguments**
+🔹 Core Idea
+Kubernetes lets you change container behavior by overriding Dockerfile defaults using:
+* command → overrides ENTRYPOINT
+* args → overrides CMD
+
+🔹 Docker vs Kubernetes Mapping
+Docker Concept	Kubernetes Field	Purpose
+ENTRYPOINT	command	Main command to run
+CMD	args	Default parameters
+🔹 Default Behavior Example
+Dockerfile:
+
+ENTRYPOINT ["sleep"]
+CMD ["5"]
+
+👉 Container runs:
+
+sleep 5
+
+
+🔹 Override CMD (change argument)
+Docker:
+
+docker run ubuntu-sleeper 10
+
+Kubernetes:
+
+args: ["10"]
+
+👉 Result:
+
+sleep 10
+
+
+🔹 Override ENTRYPOINT (change command)
+Docker:
+
+--entrypoint sleep2.0
+
+Kubernetes:
+
+command: ["sleep2.0"]
+args: ["10"]
+
+👉 Result:
+
+sleep2.0 10
+
+
+🔹 Key Rules (VERY IMPORTANT)
+* args → only changes parameters (CMD)
+* command → completely replaces ENTRYPOINT
+* Both can be used together
+
+🔹 Deployment Command
+
+kubectl create -f pod-definition.yml
+
+
+🔹 Quick Memory Trick 🧩
+* command = what to run
+* args = how to run
+
+**ENV Variable:**
+
+env:
+  name: APP-color
+  value: pink
+
+  name: APP-color
+  valueFrom: 
+    configMapkeyRef:
+
+  name: APP-color
+  valueFrom: 
+    secretkeyRef:
+
+**📦 ConfigMap in OpenShift (CRC)**
+Same concept as Kubernetes:
+👉 ConfigMap = store configuration (key-value data)👉 Used by Pods/Deployments
+
+⚡ Imperative Commands (oc)
+1. Create ConfigMap (literal)
+
+oc create configmap my-config \
+  --from-literal=APP_COLOR=blue \
+  --from-literal=APP_MODE=prod
+
+
+2. Create from file
+
+oc create configmap my-config \
+  --from-file=config.properties
+
+
+3. Create from env file
+
+oc create configmap my-config \
+  --from-env-file=app.env
+
+Example:
+
+APP_COLOR=blue
+APP_MODE=prod
+
+
+4. View ConfigMap
+
+oc get configmap
+oc describe configmap my-config
+
+
+5. Edit ConfigMap
+
+oc edit configmap my-config
+
+
+6. Delete ConfigMap
+
+oc delete configmap my-config
+
+
+📄 Declarative (YAML - oc apply)
+1. ConfigMap YAML
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-config
+data:
+  APP_COLOR: blue
+  APP_MODE: prod
+
+
+2. Apply YAML
+
+oc apply -f configmap.yaml
+
+
+3. Update ConfigMap
+
+oc apply -f configmap.yaml
+
+
+4. Delete using YAML
+
+oc delete -f configmap.yaml
+
+
+🔗 Use ConfigMap in Pod (OpenShift)
+As Environment Variable
+
+env:
+  - name: APP_COLOR
+    valueFrom:
+      configMapKeyRef:
+        name: my-config
+        key: APP_COLOR
+
+
+As Volume
+
+volumes:
+  - name: config-volume
+    configMap:
+      name: my-config
+
+
+🧠 Important Points (CRC / OpenShift)
+* oc = same as kubectl but for OpenShift
+* Works inside a project (namespace)👉 check project:
+
+envFrom:
+  - configMapRef:
+      name: my-config
+
+
+**🔐 How to Encrypt Secret Data (Easy Idea)**
+
+🎯 Goal (What you are doing)
+👉 You will:
+1. Create a secret (not secure ❌)
+2. Enable encryption 🔐
+3. Create new secret (secure ✅)
+
+🧪 FULL LAB – OpenShift CRC (Step-by-Step)
+
+🔹 STEP 1: Start CRC and Login
+
+oc get apiserver cluster -o jsonpath='{.status.conditions}'
+
+crc start
+oc login -u kubeadmin -p <your-password>
+
+Check:
+
+oc get nodes
+
+👉 If node shows → OK ✅
+
+🔹 STEP 2: Create Secret (NOT Encrypted)
+
+oc create secret generic my-secret \
+  --from-literal=password=mypassword
+
+
+🔹 STEP 3: See Secret (Understand Problem)
+
+oc get secret my-secret -o yaml
+
+You will see:
+
+password: bXlwYXNzd29yZA==
+
+👉 This is NOT encryption👉 Just encoding (easy to decode) 
+
+🔹 STEP 4: Enable Encryption (MAIN STEP)
+Run:
+
+oc edit apiserver cluster
+
+👉 An editor opens
+
+👉 Inside that file:
+Find spec:If not present, create it.
+Add this:
+
+spec:
+  encryption:
+    type: aescbc
+
+
+👉 Example full look:
+
+apiVersion: config.openshift.io/v1
+kind: APIServer
+metadata:
+  name: cluster
+spec:
+  encryption:
+    type: aescbc
+
+
+👉 Save and exit:
+* Press ESC
+* Type :wq
+* Enter
+
+🔹 STEP 5: Wait (Very Important ⏳)
+Run:
+
+oc get apiserver cluster -o yaml
+
+Wait until you see:
+
+type: EncryptionCompleted
+status: "True"
+
+👉 This means encryption is ON ✅
+
+🔹 STEP 6: Create NEW Secret (Encrypted)
+
+oc create secret generic my-secret-2 \
+  --from-literal=password=topsecret
+
+
+🔹 STEP 7: Verify (Simple Way)
+Check again:
+
+oc get secret my-secret-2 -o yaml
+
+👉 Still looks base64 (normal)
+BUT internally:👉 Stored encrypted in etcd ✅
+
+🔹 STEP 8: Re-encrypt OLD Secrets
+Old secret is still NOT encrypted ❗
+Run:
+
+oc get secrets --all-namespaces -o json | oc replace -f -
+
+👉 Now all secrets become encrypted ✅
+
+🧠 SUPER SIMPLE UNDERSTANDING
+Think like this:
+Before:
+* Secret = "password"
+* Stored = base64 → easy to decode ❌
+After:
+* Secret = "password"
+* Stored = encrypted → cannot read 🔐
+
+🔥 Most Important Commands (Remember)
+
+oc edit apiserver cluster
+
+Add:
+
+spec:
+  encryption:
+    type: aescbc
+
+
+💡 Easy Understanding
+Think like this:
+* You want to lock your data 🔐
+* But you must choose which lock type
+👉 aescbc = strong lock 🔒
+
+🔍 What is AES?
+👉 AES = Advanced Encryption Standard
+* Very secure 🔐
+* Used in:
+    * Banking 💳
+    * HTTPS 🌐
+    * VPN 🔑
+
+🔍 What is CBC?
+👉 CBC = Cipher Block Chaining
+👉 Simple idea:
+* Data is split into blocks
+* Each block depends on previous block
+👉 So:
+* Hard to break ❌
+* More secure ✅
+
+📦 Why we use aescbc in this lab?
+Because:
+✔️ Supported by Kubernetes & OpenShift✔️ Easy to configure✔️ Strong security✔️ Default recommended method
+
+
+🧩 **Multi-Container Pod Design Patterns (Complete Notes)**
+In Kubernetes, a multi-container pod means:
+👉 Running multiple containers inside a single Pod that work together as one unit.
+📌 Key Properties
+Same IP & network (localhost communication)
+Shared volumes
+Start/stop together (same lifecycle)
+Scaling happens at Pod level
+🔧 1. Sidecar Pattern
+🧠 Concept
+A sidecar container runs alongside the main container and adds supporting functionality.
+👉 Main app = business logic
+👉 Sidecar = helper (logging, monitoring, proxy, etc.)
+📦 Example (App + Logging Sidecar)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sidecar-example
+spec:
+  volumes:
+    - name: log-volume
+      emptyDir: {}
+
+  containers:
+    - name: app
+      image: busybox
+      command: ["sh", "-c"]
+      args:
+        - while true; do
+            echo "App running" >> /var/log/app.log;
+            sleep 5;
+          done
+      volumeMounts:
+        - name: log-volume
+          mountPath: /var/log
+
+    - name: log-sidecar
+      image: busybox
+      command: ["sh", "-c"]
+      args:
+        - tail -f /var/log/app.log
+      volumeMounts:
+        - name: log-volume
+          mountPath: /var/log
+✅ When to Use
+Logging (Fluentd)
+Monitoring (Prometheus exporters)
+Service mesh proxies (Istio Envoy)
+🌐 2. Ambassador Pattern
+🧠 Concept
+An ambassador container acts as a proxy between your app and external services.
+👉 App talks to localhost
+👉 Ambassador forwards to external system
+📦 Example (DB Proxy)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ambassador-example
+spec:
+  containers:
+    - name: app
+      image: busybox
+      command: ["sh", "-c"]
+      args:
+        - nc localhost 5432
+
+    - name: ambassador
+      image: alpine/socat
+      command: ["sh", "-c"]
+      args:
+        - socat TCP-LISTEN:5432,fork TCP:mydb.example.com:5432
+✅ When to Use
+External DB/API access
+Simplify configuration
+Handle retries, TLS, routing
+🔄 3. Adapter Pattern
+🧠 Concept
+An adapter container transforms data into a format required by external systems.
+👉 Converts output → standard format
+📦 Example (Log Transformation)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: adapter-example
+spec:
+  volumes:
+    - name: shared-data
+      emptyDir: {}
+
+  containers:
+    - name: app
+      image: busybox
+      command: ["sh", "-c"]
+      args:
+        - while true; do
+            echo "user login" >> /data/raw.log;
+            sleep 5;
+          done
+      volumeMounts:
+        - name: shared-data
+          mountPath: /data
+
+    - name: adapter
+      image: busybox
+      command: ["sh", "-c"]
+      args:
+        - tail -f /data/raw.log | sed 's/^/{ "log": "&" }/'
+      volumeMounts:
+        - name: shared-data
+          mountPath: /data
+✅ When to Use
+Convert logs → JSON
+Convert metrics → Prometheus format
+Standardize output
+🚀 4. Init Container Pattern
+🧠 Concept
+Init containers run before main containers start.
+👉 Used for setup tasks
+📦 Example (Preload Config)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: init-container-example
+spec:
+  volumes:
+    - name: config-volume
+      emptyDir: {}
+
+  initContainers:
+    - name: init-setup
+      image: busybox
+      command: ["sh", "-c"]
+      args:
+        - echo "config ready" > /config/config.txt
+      volumeMounts:
+        - name: config-volume
+          mountPath: /config
+
+  containers:
+    - name: app
+      image: busybox
+      command: ["sh", "-c"]
+      args:
+        - cat /config/config.txt && sleep 3600
+      volumeMounts:
+        - name: config-volume
+          mountPath: /config
+✅ When to Use
+
+
+**🧠 1. What are CPU & Resource Limits (Simple)**
+In Kubernetes:
+* Requests = minimum resources your app needs
+* Limits = maximum resources your app can use
+Example:
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+👉 Meaning:
+* App guaranteed 0.2 CPU & 256MB RAM
+* App cannot exceed 0.5 CPU & 512MB RAM
+
+**🧭 2. How to Decide Values (Step-by-Step EASY WAY)**
+✅ Step 1: Start WITHOUT limits (testing phase)
+Deploy your app first with no limits or very high limits
+👉 Why?To understand how much it actually uses
+
+✅ Step 2: Monitor usage
+Use:
+* kubectl top pod
+* or monitoring tools like Prometheus + Grafana
+Look at:
+* CPU usage
+* Memory usage
+
+✅ Step 3: Take average + peak
+Example:
+* Avg CPU = 150m
+* Peak CPU = 300m
+* Avg Memory = 200Mi
+* Peak Memory = 350Mi
+
+✅ Step 4: Define requests (safe baseline)
+👉 Rule:
+* Requests ≈ average usage
+So:
+
+requests:
+  cpu: "150m"
+  memory: "200Mi"
+
+
+✅ Step 5: Define limits (buffer)
+👉 Rule:
+* Limits ≈ peak × 1.5 (buffer)
+So:
+
+limits:
+  cpu: "450m"
+  memory: "500Mi"
+
+
+📊 3. Simple Formula (Remember This)
+👉 Requests = Average usage👉 Limits = Peak usage × 1.5 (or 2x)
+
+HPA(Horizontal Pod Aotoscaler)
+
+🚀 **Horizontal Pod Autoscaler (HPA) — Complete Guide**
+
+🧠 What is HPA?
+👉 HPA automatically increases or decreases the number of pods based on load (CPU / Memory).
+
+⚙️ How HPA Works (Simple Flow)
+1. You set a target (CPU or Memory %)
+2. Kubernetes checks current usage
+3. HPA decides:
+    * Increase pods 📈 (scale up)
+    * Decrease pods 📉 (scale down)
+
+📦 Basic Requirements
+Before using HPA:
+✔ Deployment must exist✔ Resource requests must be set✔ Metrics Server must be installed
+Check:
+
+kubectl top pods
+
+
+⚙️ Example 1: HPA with CPU only
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cpu-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: my-app
+
+  minReplicas: 2
+  maxReplicas: 10
+
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
+
+
+📊 How it behaves
+* CPU > 50% → scale up
+* CPU < 50% → scale down
+
+⚙️ Example 2: HPA with Memory only
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: memory-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: my-app
+
+  minReplicas: 2
+  maxReplicas: 10
+
+  metrics:
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 60
+
+
+📊 How it behaves
+* Memory > 60% → scale up
+* Memory < 60% → scale down (slowly)
+
+⚙️ Example 3: HPA with CPU + Memory (Most Important)
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cpu-memory-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: my-app
+
+  minReplicas: 2
+  maxReplicas: 10
+
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
+
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 60
+
+
+🧠 Important Rule
+👉 HPA checks both CPU and Memory
+👉 It scales based on:➡️ whichever needs more pods
+
+📊 Real-Time Scenarios
+🟢 Case 1: Normal load
+* CPU = 40%
+* Memory = 50%👉 No scaling
+
+🔥 Case 2: High CPU
+* CPU = 80%
+* Memory = 50%
+👉 Scale up (CPU triggered)
+
+🔥 Case 3: High Memory
+* CPU = 45%
+* Memory = 85%
+👉 Scale up (Memory triggered)
+
+🌙 Case 4: Low usage
+* CPU = 20%
+* Memory = 30%
+👉 Scale down
+
+⚠️ Common Mistakes
+❌ Not setting resources.requests❌ Metrics server not installed❌ Expecting memory to drop quickly❌ Setting wrong thresholds (too low/high)
+
+🔍 Useful Commands
+
+kubectl get hpa
+kubectl describe hpa cpu-memory-hpa
+kubectl top pods
+
+
+🧠 CPU vs Memory (Quick Recap)
+* CPU → fast changing → best for traffic
+* Memory → slow changing → used for stability
+
+💡 When to use what?
+✔ Use CPU:
+* Web apps
+* APIs
+* Traffic-based systems
+✔ Use Memory:
+* Caching apps
+* Data-heavy apps
+* Java apps
+✔ Use both:
+* Production systems (recommended)
+
+
+🚀 HPA vs VPA (Easy Differences)
+Point	HPA 🟢	VPA 🔵
+Full form	Horizontal Pod Autoscaler	Vertical Pod Autoscaler
+What it changes	Number of pods	CPU & Memory of pod
+Scaling type	Horizontal	Vertical
+Example	2 → 6 pods	200Mi → 600Mi memory
+Restart needed	❌ No	⚠️ Yes (sometimes)
+Speed	Fast	Slow
+Best for	Traffic increase	Resource optimization
+Use case	Web apps, APIs	Databases, heavy apps
+🧠 Super Simple Line
+👉 HPA = increase pods👉 VPA = increase pod size
+
+📦 VPA Notes (Very Easy)
+🧠 What VPA does
+👉 Automatically adjusts:
+* CPU
+* Memory
+based on real usage
+
+⚙️ VPA Modes
+1. Off mode
+👉 Only gives recommendation👉 No changes
+
+2. Initial mode
+👉 Sets values when pod starts👉 No changes later
+
+3. Auto mode (important)
+👉 Automatically updates resources👉 May restart pod
+
+⚠️ Important Points
+* VPA may restart pods to apply changes
+* Works best for stable workloads
+* Not good for sudden traffic spikes
+* Needs metrics server
+
+📊 Simple Example
+Before VPA:
+
+cpu: 200m
+memory: 200Mi
+
+After VPA:
+
+cpu: 500m
+memory: 600Mi
+
+
+💡 When to use VPA
+✔ You don’t know correct CPU/memory✔ App runs for long time✔ Want to save cost (no over-allocation)
+
+⚠️ One Important Interview Point
+👉 Don’t use HPA + VPA together blindly👉 They can conflict (both try to control CPU)
+
+🧠 Final Quick Revision
+* HPA → handles traffic
+* VPA → handles resource sizing
+
+**VPA is not built in for kubernetes**
+
+**OS Upgradation**
+
+Kubernetes (K8s) OS upgradation usually means updating the operating system on the nodes (machines) in your cluster without breaking your running applications.
+Let’s break it down in very simple terms 👇
+🧠 Basic Idea
+A Kubernetes cluster has:
+Master (Control Plane) nodes
+Worker nodes (where your apps run)
+OS upgrade = updating Linux (like Ubuntu, CentOS, etc.) on these nodes.
+But ⚠️ you must not stop everything at once, or your apps will go down.
+So Kubernetes uses a rolling upgrade approach.
+
+🔄 **How OS Upgradation Works (Step-by-Step)**
+1. Pick one node at a time
+You never upgrade all nodes together.
+👉 Upgrade happens node by node
+2. Drain the node
+Before upgrading, Kubernetes safely moves apps away:
+kubectl drain <node-name>
+What happens:
+Pods are gracefully stopped
+They are moved to other nodes
+3. Upgrade the OS
+Now you can safely upgrade OS on that node:
+Example (Ubuntu):
+sudo apt update && sudo apt upgrade -y
+sudo reboot
+4. Bring node back
+After reboot:
+kubectl uncordon <node-name>
+Now:
+Node becomes active again
+New pods can run on it
+5. Repeat for next node
+Same process for all nodes one by one
+🔁 Why This Works (Important Concept)
+Kubernetes ensures:
+Apps are running in multiple replicas
+So when one node goes down → others handle traffic
+This is called high availability
+⚠️ Important Things to Remember
+✅ 1. Always have multiple replicas
+Use Deployments like:
+replicas: 3
+✅ 2. Use Pod Disruption Budget (PDB)
+It ensures minimum pods stay running
+✅ 3. Control Plane first or last?
+In production: usually workers first, then control plane carefully
+✅ 4. Managed Kubernetes (EKS, GKE, AKS)
+Cloud providers often:
+Handle node upgrades automatically
+Or provide rolling upgrade tools
+🧩 Simple Analogy
+Think of a hotel 🏨:
+Rooms = Nodes
+Guests = Pods
+To renovate a room:
+Move guests to other rooms
+Renovate
+Open it again
+Do this one room at a time → hotel keeps running
+🚀 Quick Summary
+Upgrade nodes one by one
+Use:
+kubectl drain
+upgrade OS
+kubectl uncordon
+Kubernetes automatically reschedules apps
+Ensures zero downtime (if configured well)
+
+
+🚀 Kubernetes Cluster Upgrade — Real-Time Flow (Simple)
+Think of your Kubernetes cluster like this:
+* 🧠 Master node = brain (control center)
+* 👷 Worker nodes = workers (run your apps)
+
+🟢 STEP 1: Before Upgrade (Current Situation)
+👉 Example:
+* Cluster is running version 1.10
+* New versions available: 1.11, 1.12
+⚠️ Important rule:
+* Don’t jump directly → always go one version at a time
+✅ So flow will be:
+
+1.10 → 1.11 → 1.12
+
+
+🟡 STEP 2: Start Upgrade (Master First)
+👉 First upgrade the master node (brain)
+What happens in real-time:
+1. You run:kubeadm upgrade plan👉 It shows:
+    * current version
+    * next version
+    * what will be upgraded
+2. Then you upgrade:kubeadm upgrade apply v1.11
+
+⚡ During this time:
+* ❌ You cannot manage cluster(kubectl commands may not work)
+* ✅ BUT apps are still running on worker nodes
+👉 Think like:
+Brain is restarting, but workers keep working
+
+🟢 STEP 3: After Master Upgrade
+Now:
+* Master = ✅ upgraded (1.11)
+* Workers = ❌ still old (1.10)
+👉 Cluster still works fine
+
+🔵 STEP 4: Upgrade Master’s Kubelet
+👉 Important detail:
+Even after upgrade:
+
+kubectl get nodes
+
+👉 May still show old version 😅
+Why?
+* Because it shows kubelet version, not API server
+👉 So you:
+1. Upgrade kubelet
+2. Restart kubelet
+Now master is fully updated ✅
+
+🟣 STEP 5: Upgrade Worker Nodes (One by One)
+👉 This is VERY important for zero downtime
+
+🔁 For each worker node:
+Step A: Drain node
+
+kubectl drain node-1
+
+👉 What happens:
+* Moves apps (pods) to other nodes
+* Node becomes empty
+
+Step B: Upgrade node
+* Upgrade kubeadm
+* Upgrade kubelet
+* Restart kubelet
+
+Step C: Bring node back
+
+kubectl uncordon node-1
+
+👉 Node starts accepting workloads again
+
+🔁 Repeat for all worker nodes
+
+🔴 Alternative (Other Strategies)
+Instead of one-by-one, you can:
+1. Upgrade all at once
+* ❌ Fast
+* ❌ Causes downtime
+2. Add new nodes (best in production)
+* Add new nodes with new version
+* Move apps
+* Delete old nodes
+
+🧠 Important Rules (Easy Memory)
+✅ Rule 1:
+No component > API Server version
+
+✅ Rule 2:
+Upgrade order:
+
+1. Master
+2. Worker nodes
+
+
+✅ Rule 3:
+Always upgrade:
+
+One version at a time
+
+
+✅ Rule 4:
+kubeadm ≠ kubelet👉 You must upgrade kubelet separately
+
+🎯 Final Real-Time Flow (Quick Summary)
+
+START
+↓
+Check upgrade plan
+↓
+Upgrade kubeadm
+↓
+Upgrade MASTER (API server, scheduler, etc.)
+↓
+Upgrade master kubelet
+↓
+For each worker:
+    Drain node
+    Upgrade kubelet
+    Uncordon node
+↓
+Cluster fully upgraded 🎉
+
+
+
+
+
+**Kubernetes Backup & Restore — OC-CRC Notes**
+
+🔹 OC1: What to Backup
+C (Command / Concept):
+* Backup:
+    * Declarative files (YAML)
+    * Cluster state (etcd)
+    * Imperative resources (created manually)
+R (Reason):
+* If cluster fails → you can recreate everything
+C (Conclusion):👉 Always keep YAML + etcd backup for safety 
+
+🔹 OC2: Declarative Backup (BEST METHOD)
+C:
+
+kubectl apply -f pod-definition.yml
+
+R:
+* YAML files act like documentation + backup
+* Can store in GitHub
+C:👉 Easy restore → just re-apply files
+
+🔹 OC3: Imperative Backup (From Cluster)
+C:
+
+kubectl get all --all-namespaces -o yaml > backup.yaml
+
+R:
+* Some resources created using commands (not saved in files)
+C:👉 This command exports full cluster state
+
+🔹 OC4: etcd Backup (MOST IMPORTANT)
+C:
+
+ETCDCTL_API=3 etcdctl snapshot save snapshot.db
+
+R:
+* etcd stores all cluster data (brain of Kubernetes)
+C:👉 Without etcd → cluster cannot recover
+
+🔹 OC5: Check Backup
+C:
+
+ETCDCTL_API=3 etcdctl snapshot status snapshot.db
+
+R:
+* Verify snapshot is valid
+C:👉 Always verify backup after taking it
+
+🔹 OC6: etcd Restore Steps (IMPORTANT LAB)
+C:
+1. Stop API server
+2. Restore snapshot:
+
+ETCDCTL_API=3 etcdctl snapshot restore snapshot.db \
+--data-dir /var/lib/etcd-from-backup
+
+1. Update etcd config (new data-dir)
+2. Restart services
+R:
+* Restore creates new etcd data directory
+C:👉 Cluster comes back from backup
+
+🔹 OC7: Secure Backup (with certs)
+C:
+
+ETCDCTL_API=3 etcdctl snapshot save snapshot.db \
+--endpoints=https://127.0.0.1:2379 \
+--cacert=/etc/etcd/ca.crt \
+--cert=/etc/etcd/server.crt \
+--key=/etc/etcd/server.key
+
+R:
+* etcd uses TLS → needs certificates
+C:👉 Required in real clusters
+
+🔹 OC8: Which Method to Use?
+Method	When to Use
+YAML (Declarative)	Best & easiest
+kubectl get backup	When resources not saved
+etcd snapshot	Full cluster recovery
+👉 Final idea:
+* YAML = App backup
+* etcd = Full cluster backup
+
+🔥 Lab Quick Practice (IMPORTANT)
+Try these:
+
+# 1. Export cluster
+kubectl get all --all-namespaces -o yaml > backup.yaml
+
+# 2. Take etcd snapshot
+ETCDCTL_API=3 etcdctl snapshot save snapshot.db
+
+# 3. Check snapshot
+ETCDCTL_API=3 etcdctl snapshot status snapshot.db
+
+
+🔐 **Kubernetes Authentication — Full Easy Summary**
+🧠 What this page is about
+This page explains how Kubernetes checks “who you are” before allowing access to the cluster.
+👉 In simple words:Before anyone (human or machine) can use Kubernetes → it must verify identity (authentication).
+
+🏗️ Basic Idea: How Kubernetes Works
+￼
+￼
+￼
+4
+* Kubernetes has a central component called kube-apiserver
+* Every request goes through it:
+    * kubectl
+    * dashboard
+    * scripts
+    * bots
+* First step → Authentication (Who are you?)
+* Next step → Authorization (What can you do?)
+
+👥 Who uses Kubernetes?
+There are 4 types of users:
+1. 👨‍💻 Admins – manage cluster
+2. 🧑‍💻 Developers – deploy apps
+3. 👤 End users – use apps (outside Kubernetes scope)
+4. 🤖 Bots/Services – automated systems
+
+⚠️ Important Concept
+👉 Kubernetes does NOT create normal user accounts
+* No kubectl create user
+* Users come from outside systems
+But it DOES manage:
+* ✅ Service Accounts (for apps/bots inside cluster)
+Example:
+
+kubectl create serviceaccount sa1
+
+
+🔑 How Authentication Works (Main Part)
+Flow (very important)
+1. User sends request → API server
+2. API server checks identity using configured method
+3. If valid → moves to authorization (RBAC)
+
+🧩 Authentication Methods
+￼
+￼
+￼
+4
+1. ❌ Static Username & Password (Basic Auth)
+* Stored in CSV file
+* Plain text passwords 😱
+* Example:password,username,uid,groups
+* ❌ Deprecated (not safe)
+
+2. ❌ Static Token File
+* Token mapped to user
+* Also stored in CSV
+* Used like:Authorization: Bearer <token>
+* ❌ Also deprecated
+
+3. ✅ TLS Client Certificates (Recommended)
+* Uses certificates signed by CA
+* Very secure
+* Used for:
+    * admins
+    * machines
+👉 Best for production systems
+
+4. ✅ External Identity Providers (Best for big setups)
+Examples:
+* OIDC (Google login style)
+* LDAP
+* Kerberos
+👉 Used in companies for:
+* Single Sign-On (SSO)
+* centralized login system
+
+📊 Quick Comparison
+Method	Security	Use Case
+Basic Auth	❌ Low	Testing only
+Token File	❌ Low	Temporary setups
+TLS Cert	✅ High	Production
+OIDC / LDAP	✅ Very High	Enterprise
+⚙️ How It Works Internally
+Example: Request Flow
+
+kubectl command
+     ↓
+kube-apiserver
+     ↓
+Authenticate user
+     ↓
+Authorize (RBAC)
+     ↓
+Allow / Deny
+
+
+Example Commands
+Basic Auth (old way)
+
+curl -u user:password https://api-server
+
+Token
+
+
+TLS Basics – Simple Summary
+What is TLS?
+TLS (Transport Layer Security) is used to secure communication over networks.
+It ensures:
+Data is encrypted
+The server is authentic (trusted)
+Why TLS is Needed
+Without TLS, data (like passwords) is sent as plain text
+Hackers can easily intercept and misuse sensitive data
+Types of Encryption
+1. Symmetric Encryption
+Uses one single key for:
+Encryption
+Decryption
+Problem:
+Key must be shared → can be intercepted
+2. Asymmetric Encryption
+Uses two keys:
+Public key (shared)
+Private key (kept secret)
+Data encrypted with public key → decrypted only by private key
+More secure for key exchange
+SSH Security Using Key Pairs
+Instead of passwords, SSH uses key pairs
+Steps:
+Generate keys using ssh-keygen
+Private key: id_rsa
+Public key: id_rsa.pub
+Add public key to server (authorized_keys)
+Connect using private key:
+ssh -i id_rsa user@server
+Same private key can be used across multiple servers
+How HTTPS (TLS) Works
+Server creates public + private key
+Server sends certificate (with public key) to client
+Client generates a symmetric key
+Client encrypts it using server’s public key
+Server decrypts using its private key
+Communication continues using symmetric encryption
+👉 Combines:
+Asymmetric → secure key exchange
+Symmetric → fast communication
+Generating Keys (OpenSSL)
+# Private key
+openssl genrsa -out my-bank.key 1024
+
+# Public key
+openssl rsa -in my-bank.key -pubout > mybank.pem
+Certificates
+A certificate contains:
+Issuer (who signed it)
+Domain name
+Public key
+Validity period
+Certificate Authorities (CAs)
+Trusted organizations (e.g., DigiCert, GlobalSign)
+They:
+Verify identity
+Sign certificates
+Certificate Signing Request (CSR)
+openssl req -new -key my-bank.key -out my-bank.csr \
+-subj "/C=US/ST=CA/O=MyOrg/CN=my-bank.com"
+Sent to CA to get a signed certificate
+Browser Trust Process
+Server sends certificate
+Browser checks it using CA public keys
+If valid → secure connection established
+Internal Systems
+Companies can create their own private CA
+Used for internal applications
+Important Notes
+Public key → can be shared
+Private key → must be kept secret
+Files:
+Certificates → .crt, .pem
+Private keys → .key
+Key Takeaways
+TLS secures communication using encryption
+Uses both:
+Asymmetric (for key exchange)
+Symmetric (for data transfer)
+SSH uses key pairs instead of passwords
+HTTPS relies on CA-signed certificates
+
+🔐 **TLS in Kubernetes – Notes**
+📌 Overview
+TLS (Transport Layer Security) is used to secure communication in a Kubernetes cluster.
+It ensures:
+Encryption 🔒
+Authentication ✅
+Uses:
+Server Certificates → Secure services
+Client Certificates → Authenticate users/components
+📁 Certificate File Naming
+Public Certificates
+Extensions: .crt, .pem
+Example: server.crt, client.pem
+Private Keys
+Contain word key
+Example: server.key, server-key.pem
+👉 If filename doesn’t contain key, it’s usually a public certificate
+🧩 Kubernetes Components & Certificates
+🖥️ Server Components (Use Server Certificates)
+Kube API Server
+Main control plane component
+Example:
+api-server.crt
+api-server.key
+ETCD Server
+Stores cluster data
+Example:
+etcd-server.crt
+etcd-server.key
+Kubelet (Worker Nodes)
+Runs on each worker node
+Example:
+kubelet.crt
+kubelet.key
+👤 Client Components (Use Client Certificates)
+Admin (kubectl)
+Example:
+admin.crt
+admin.key
+Scheduler
+Example:
+scheduler.crt
+scheduler.key
+Controller Manager
+Uses its own certificate pair
+Kube Proxy
+Example:
+kube-proxy.crt
+kube-proxy.key
+🔄 Communication Flow
+API Server communicates with:
+ETCD (secure connection)
+Kubelets (secure connection)
+Can use:
+Same certificates OR
+Separate dedicated certificates
+📂 Certificate Categories
+Type	Used By
+Client Certificates	Admin, Scheduler, Controller Manager, Kube Proxy
+Server Certificates	API Server, ETCD, Kubelet
+🏢 Certificate Authority (CA)
+All certificates must be signed by a CA
+CA has:
+CA.crt
+CA.key
+You can use:
+Single CA (simple setup)
+Multiple CAs (advanced security)
+🧠 Key Points to Remember
+TLS = Security backbone of Kubernetes
+Every component needs:
+Certificate + Key
+Two main types:
+Client certs (authentication)
+Server certs (encryption)
+CA is mandatory
+
+
+
+🔐 **What is this about?**
+This guide explains how to create TLS certificates in Kubernetes using OpenSSL.
+👉 TLS certificates help secure communication between different parts of a Kubernetes cluster.
+🧩 1. Certificate Authority (CA)
+First, you create a CA (Certificate Authority).
+CA is like a trusted authority that signs all other certificates.
+It generates:
+ca.key → private key (keep it safe!)
+ca.crt → root certificate
+👉 All other certificates will be signed using this CA.
+👤 2. Client Certificates (Users & Components)
+Used by:
+Admin user
+Scheduler
+Controller Manager
+kube-proxy
+Example: Admin certificate
+Create private key
+Create CSR (request)
+Sign it using CA
+👉 This certificate acts like login credentials (username + password).
+🌐 3. Using Certificates
+Instead of username/password, Kubernetes uses certificates.
+Example: API requests use:
+client key
+client certificate
+CA certificate
+👉 These are usually stored in a kubeconfig file.
+🖥️ 4. Server Certificates
+Servers also need certificates.
+Both client and server must trust the same CA.
+📦 Etcd Server
+Etcd (database of Kubernetes) needs certificates.
+If multiple etcd nodes → need peer certificates.
+Config file includes:
+cert file
+key file
+trusted CA
+👉 Ensures secure communication between etcd nodes.
+🚪 5. Kube API Server Certificates
+API server is the main entry point.
+It has many names (DNS + IP).
+👉 So its certificate must include:
+Multiple DNS names
+Multiple IP addresses (SANs)
+If not → communication may fail.
+🖧 6. Kubelet (Node) Certificates
+Each node (server) has a kubelet.
+Every node needs:
+its own certificate
+its own key
+👉 Used for:
+talking to API server
+identifying the node
+Also:
+Node identity should be like system:node
+Helps Kubernetes assign permissions correctly.
+
+
+🧾 Summary: Viewing & Verifying Kubernetes Certificates
+🔹 1. Purpose of the Lesson
+Learn how to check and verify certificates in a Kubernetes cluster
+Useful when doing health checks or troubleshooting issues
+🔹 2. Understand Cluster Setup
+Kubernetes clusters can be created in two ways:
+Manual setup
+You create and manage certificates yourself
+Using kubeadm
+Certificates are automatically created and managed
+Components run as pods (not system services)
+🔹 3. Where to Find Certificate Info
+Check configuration files to locate certificates:
+Manual setup → system service files
+kubeadm → /etc/kubernetes/manifests/
+Example:
+kube-apiserver config shows paths like:
+--client-ca-file
+--tls-cert-file
+--tls-private-key-file
+🔹 4. Create a Certificate Checklist 📋
+Make a list (spreadsheet recommended) with:
+Certificate file path
+Names (CN & SAN)
+Organization
+Owner
+Issuer (CA)
+Expiry date
+👉 Helps in troubleshooting and renewal
+🔹 5. Inspect Certificates (Important Step)
+Use OpenSSL command:
+openssl x509 -in <certificate-file> -text -noout
+This shows:
+Certificate details
+Expiry date
+Issuer
+Valid names
+✔ Ensure:
+Not expired
+Correct CA
+Proper configuration
+🔹 6. Troubleshooting Using Logs 🔍
+If using system services:
+journalctl -u etcd.service -l
+If using kubeadm:
+Use:
+kubectl logs <pod-name>
+If cluster is down:
+docker ps -a
+docker logs <container-id>
+⚠️ Common error:
+TLS / certificate issues (e.g., “bad certificate”)
+🔹 7. Key Takeaways
+Always identify certificate files first
+Use OpenSSL to inspect them
+Check expiry + issuer
+Use logs to debug issues
+Maintain a certificate inventory
+
+
+📌 What this page is about
+It explains how certificates are managed in Kubernetes using something called the Certificates API.
+🔐 Basic idea (in simple words)
+Kubernetes uses certificates for security (like login IDs).
+Each user/admin needs their own certificate + key to access the cluster.
+These certificates are created and signed by a Certificate Authority (CA).
+🔄 How the process works (step-by-step)
+1. New user joins
+Creates:
+Private key
+CSR (Certificate Signing Request)
+2. Admin checks request
+Admin reviews the CSR
+Signs it using CA
+3. User gets access
+User receives signed certificate
+Now they can access the cluster
+4. Renewal
+Certificates expire → need to repeat process
+🤖 Problem with manual process
+If many users → too many requests
+Manual signing becomes slow and difficult
+⚙️ Solution: Certificates API
+Kubernetes provides Certificates API to automate things:
+Users send CSR using API
+Admin can:
+View requests → kubectl get csr
+Approve → kubectl certificate approve <name>
+Kubernetes automatically signs certificates
+🧠 Who actually signs certificates?
+👉 Controller Manager
+Handles:
+CSR approval
+Certificate signing
+Uses CA key + certificate internally
+🔑 Important points
+CA = very important → must be secure
+Certificates:
+Give access
+Expire after time
+Certificates API:
+Makes process automatic and scalable
+✅ Final simple takeaway
+👉 Kubernetes uses certificates for secure access
+👉 Users request certificates via CSR
+👉 Admin approves them
+👉 Certificates API + Controller Manager automate everything
+If you want, I can make a diagram or flowchart so it's even easier to remember 👍
+give me example as well
+Got it 👍 — here’s a simple real-life example so you can understand clearly.
+👩‍💻 Example: New developer joining a team
+Imagine you have a Kubernetes cluster and a new developer named Jane joins.
+🔐 Step-by-step example
+🟢 Step 1: Jane creates request
+Jane creates:
+Private key → jane.key
+CSR (request)
+👉 This is like:
+“Hey admin, please give me access”
+🟡 Step 2: Jane sends request
+Jane sends her CSR to Kubernetes (via API)
+🔵 Step 3: Admin checks request
+Admin runs:
+kubectl get csr
+Output:
+NAME   STATUS    USER
+jane   Pending   jane
+👉 Meaning: Jane is waiting for approval
+🟣 Step 4: Admin approves
+Admin runs:
+kubectl certificate approve jane
+👉 Now Kubernetes:
+Signs certificate using CA
+Generates final certificate
+🟠 Step 5: Jane gets access
+Jane receives signed certificate
+Now she can run commands like:
+kubectl get pods
+✅ She is officially allowed into the cluster
+🔄 After some time
+Jane’s certificate expires
+She must repeat same process
+🤖 How automation helps
+Instead of manual work:
+Kubernetes Certificates API:
+Handles CSR requests
+Helps approve easily
+Automates certificate handling
+🧠 Easy way to remember
+Think of it like:
+CSR = Application form
+Admin = Verifier
+CA = Authority that gives ID card
+Certificate = ID card to access system
+
+**All certificates stored in controller manager**
+
+🧠 **Kubeconfig (Super Simple Explanation)**
+👉 A kubeconfig file is like a saved login + settings file for Kubernetes.
+It helps you avoid typing long commands again and again.
+🔐 1. Problem (Without kubeconfig)
+If you want to talk to a Kubernetes cluster, you must give many details every time:
+👉 Example:
+kubectl get pods \
+  --server https://my-kube-playground:6443 \
+  --client-key admin.key \
+  --client-certificate admin.crt \
+  --certificate-authority ca.crt
+😩 This is long and annoying!
+✅ 2. Solution (Using kubeconfig)
+Instead, you save all this in one file → kubeconfig
+Then you just run:
+kubectl get pods
+🔥 Much easier!
+📦 3. What’s inside kubeconfig?
+It has 3 main parts:
+1. Clusters 🖥️
+List of Kubernetes clusters
+👉 Example:
+dev cluster
+production cluster
+2. Users 👤
+Who can access the clusters
+👉 Example:
+admin
+developer
+3. Contexts 🔗 (MOST IMPORTANT)
+👉 A context = cluster + user
+Example:
+admin using production cluster
+dev using dev cluster
+💡 Easy Analogy:
+Think like:
+Cluster = Website
+User = Login account
+Context = “which account logs into which website”
+🔄 4. Switching between clusters
+You can switch easily:
+kubectl config use-context prod-user@production
+👉 Example:
+Before: working on dev
+After: switched to production
+👀 5. View current config
+kubectl config view
+👉 Shows:
+current cluster
+user
+context
+📂 6. Use different kubeconfig file
+kubectl config view --kubeconfig=my-config
+👉 Useful when:
+you have multiple projects
+different teams
+🏷️ 7. Default Namespace
+Namespace = folder inside cluster
+👉 Example:
+Without namespace:
+kubectl get pods
+Shows all pods
+With default namespace:
+namespace: finance
+Now:
+👉 kubectl get pods → shows only finance pods
+🔐 8. Certificates (Security)
+Kubeconfig stores security info:
+👉 Two ways:
+File path
+certificate-authority: /etc/kubernetes/pki/ca.crt
+Direct data (encoded)
+certificate-authority-data: LS0tLS1...
+🎯 Final Simple Summary
+kubeconfig = shortcut + saved settings
+avoids typing long commands
+contains:
+clusters
+users
+contexts
+lets you:
+switch clusters easily
+set default namespace
+manage authentication
+
+🧠 **Kubernetes API Groups — Easy Summary**
+1. What is Kubernetes API?
+Kubernetes API is the main way to talk to your cluster
+Every command (like kubectl get pods) goes through the API server
+👉 Example:
+curl https://kube-master:6443/version
+This returns cluster info like version, platform, etc.
+2. What are API Groups?
+Kubernetes organizes features into API Groups to keep things clean and manageable.
+👉 Think of it like:
+📁 Folder system
+Each folder = one API group
+Inside folder = related resources
+3. Types of API Groups
+🔹 A. Core API Group (Important basics)
+Path: /api/v1
+Contains basic Kubernetes objects
+👉 Examples:
+Pods
+Services
+Nodes
+Namespaces
+ConfigMaps
+Secrets
+👉 Example API:
+/api/v1/pods
+🔹 B. Named API Groups (Advanced features)
+Path: /apis/<group-name>/<version>
+👉 Examples:
+/apis/apps → Deployments, ReplicaSets
+/apis/networking.k8s.io → Network Policies
+/apis/storage.k8s.io → Storage features
+👉 Example:
+/apis/apps/v1/deployments
+4. Resources + Actions (Verbs)
+Each API group has:
+Resources (objects)
+Verbs (actions you can perform)
+👉 Common verbs:
+get → read one object
+list → see all objects
+create → make new
+delete → remove
+update → modify
+watch → monitor changes
+👉 Example:
+kubectl get pods
+Resource = pods
+Verb = get
+5. Important API Endpoints
+When you query API server, you see:
+[
+  "/api",
+  "/api/v1",
+  "/apis",
+  "/healthz",
+  "/metrics",
+  "/logs"
+]
+👉 Meaning:
+/api → core APIs
+/apis → named APIs
+/healthz → health check
+/metrics → performance data
+6. How to Access API Server
+❌ Without authentication
+curl http://localhost:6443
+➡️ You get 403 Forbidden (no access)
+✅ With certificates
+curl http://localhost:6443 \
+  --key admin.key \
+  --cert admin.crt
+✅ Easiest way: kubectl proxy
+kubectl proxy
+Then:
+curl http://localhost:8001
+✔ No need to manually use certificates
+✔ Uses kubeconfig automatically
+7. Important Note
+👉 kubectl proxy ≠ kube-proxy
+kubectl proxy → access API server
+kube-proxy → networking inside cluster
+🧾 Final Understanding
+Kubernetes API = entry point to cluster
+API Groups = logical grouping of features
+Two main types:
+Core (/api/v1)
+Named (/apis/...)
+Each group has:
+Resources (pods, deployments)
+Verbs (get, create, delete)
+You can access API via:
+curl (with auth)
+kubectl proxy (easy way)
+💡 Simple Real-Life Analogy
+Think Kubernetes like a hospital system:
+API Server = Reception desk
+API Groups = Departments (Cardiology, Neurology)
+Resources = Patients / records
+Verbs = actions (check, admit, discharge)
+
+📄 Kubernetes Authorization – Complete Master Sheet
+
+🔐 1. Authentication vs Authorization
+Concept	Meaning	Example
+Authentication	Who are you?	User logs in using certificate
+Authorization	What can you do?	Can user delete node?
+👉 Flow:User → Authenticate → Authorize → Perform Action
+
+👥 2. Users in Kubernetes
+Type	Examples	Purpose
+Humans	Admin, Developer, Tester	Manage cluster
+Machines	kubelet, CI/CD bot, Jenkins	Automation
+👉 As users increase → need proper permission control 
+
+🧠 3. Central Component
+👉 Kube API Server
+* All requests go through it
+* Handles authentication + authorization
+* Communicates with:
+    * Users
+    * kubelets (nodes)
+
+👥 4. ALL ROLES TOGETHER (Main Sheet)
+Action	Admin	Developer	Bot
+Get Pods	✅	✅	✅
+Create Pods	✅	✅	✅
+Delete Pods	✅	✅	❌
+Get Nodes	✅	❌	❌
+Delete Nodes	✅	❌	❌
+Deploy Apps	✅	✅	✅
+Cluster Config Change	✅	❌	❌
+🧪 Example (Real Commands)
+✅ Allowed
+
+kubectl get pods
+
+* Admin → ✅
+* Developer → ✅
+* Bot → ✅
+
+❌ Forbidden
+
+kubectl delete node worker-1
+
+* Admin → ✅
+* Developer → ❌ Forbidden
+* Bot → ❌ Forbidden
+
+❌ Error Example
+
+Error: User "developer" cannot delete resource "nodes"
+
+
+🧩 5. Authorization Types (Complete)
+
+🔹 1. Node Authorization
+Feature	Details
+Used for	kubelets (nodes)
+Group	system:nodes
+Certificate	system:node:<node-name>
+✅ Example
+* Node1 → can:
+    * Read its own pods
+    * Update its own status
+* Node1 → cannot:
+    * Access Node2 data
+👉 Controlled by Node Authorizer
+
+🔹 2. ABAC (Attribute-Based Access Control)
+Feature	Details
+Config	JSON file
+Mapping	User → Permission
+Update	Requires API server restart ❌
+Example Policy
+
+{"user": "dev-user", "resource": "pods", "namespace": "*"}
+{"group": "dev-users", "resource": "pods"}
+
+✅ Example Meaning
+* dev-user → can manage pods
+* dev-users group → same permissions
+⚠️ Problem:
+* Hard to maintain
+* Not scalable 
+
+🔹 3. RBAC (Role-Based Access Control) ⭐
+Feature	Details
+Method	Role → assign to users
+Benefit	Easy, scalable
+Standard	Most used
+✅ Example (ALL ROLES)
+🟢 Admin Role
+
+kind: Role
+metadata:
+  name: admin
+rules:
+- resources: ["*"]
+  verbs: ["*"]
+
+
+🔵 Developer Role
+
+kind: Role
+metadata:
+  name: developer
+rules:
+- resources: ["pods"]
+  verbs: ["get", "list", "create", "delete"]
+
+
+🟡 Bot Role
+
+kind: Role
+metadata:
+  name: bot
+rules:
+- resources: ["pods"]
+  verbs: ["get", "list", "create"]
+
+
+🔗 Role Assignment
+
+admin-user → admin
+dev-user → developer
+ci-bot → bot
+
+
+🔁 Benefit Example
+👉 Change role once → affects all users
+
+🔹 4. Webhook / External Authorization
+Feature	Details
+Tool	Open Policy Agent (OPA)
+Control	External system
+Flow Example
+1. User request
+2. API server → sends to OPA
+3. OPA → Allow / Deny
+👉 Useful for advanced policies 
+
+⚙️ 6. Authorization Modes
+
+🔓 AlwaysAllow
+* Allows everything
+
+--authorization-mode=AlwaysAllow
+
+👉 Example:
+* Any user can delete nodes
+
+🔒 AlwaysDeny
+* Denies everything
+👉 Example:
+* Even admin cannot access pods
+
+🔁 7. Multiple Modes (IMPORTANT)
+
+--authorization-mode=Node,RBAC,Webhook
+
+🔄 Flow
+1. Node authorizer checks
+2. If denied → RBAC checks
+3. If denied → Webhook checks
+4. If any approves → ✅ Allow
+5. If all deny → ❌ Reject
+👉 Order matters 
+
+🧠 8. Namespace-Based Control
+👉 When multiple teams share cluster:
+* Dev team → only access dev namespace
+* Test team → only access test namespace
+✔ Prevents cross-team access
+
+🔁 9. Full Request Flow (End-to-End)
+Example:
+
+kubectl delete node worker-2
+
+Steps:
+1. Authentication
+    * User identity verified
+2. Authorization
+    * Node? → No
+    * RBAC? → Check role
+    * Webhook? → Optional
+3. Result:
+Role	Result
+Admin	✅ Allowed
+Developer	❌ Denied
+Bot	❌ Denied
+🧠 10. Real-Life Analogy
+Kubernetes	Real Life
+Authentication	Security guard checks ID
+Authorization	Manager gives permission
+RBAC	Job roles
+Node Authorizer	Machine access control
+📌 FINAL KEY POINTS
+* Always use RBAC (standard)
+* Avoid ABAC in real projects
+* Use least privilege principle
+* API Server is the core
+* Multiple authorization modes can work together
+* Nodes have special authorization
+
+
+
+🔐 **Kubernetes RBAC (Role-Based Access Control) — Simple Summary**
+RBAC in Kubernetes is used to control who can do what inside a cluster.
+You mainly do 3 things:
+1. Create a Role → define permissions
+2. Create a RoleBinding → assign role to a user
+3. Verify & test permissions
+
+1️⃣ Creating a Role
+A Role defines what actions are allowed on which resources.
+👉 Example: A role named developer
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: developer
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["list", "get", "create", "update", "delete"]
+- apiGroups: [""]
+  resources: ["ConfigMap"]
+  verbs: ["create"]
+
+✔ What this means:
+* Can manage pods (list, create, delete, etc.)
+* Can only create ConfigMaps
+👉 Create it:
+
+kubectl create -f developer-role.yaml
+
+📌 Note: Roles work inside a namespace only
+
+2️⃣ Creating a Role Binding
+A RoleBinding connects a user to a role.
+👉 Example: Assign role developer to user dev-user
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: devuser-developer-binding
+subjects:
+- kind: User
+  name: dev-user
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: developer
+  apiGroup: rbac.authorization.k8s.io
+
+👉 Create it:
+
+kubectl create -f devuser-developer-binding.yaml
+
+✔ Now dev-user gets all permissions from the developer role
+
+3️⃣ Verifying Roles & Bindings
+👉 Check roles:
+
+kubectl get roles
+
+Example output:
+
+NAME        AGE
+developer   4s
+
+👉 Check role bindings:
+
+kubectl get rolebindings
+
+Example:
+
+NAME                      AGE
+devuser-developer-binding 24s
+
+👉 Detailed info:
+
+kubectl describe role developer
+kubectl describe rolebinding devuser-developer-binding
+
+
+4️⃣ Testing Permissions
+Use this command:
+
+kubectl auth can-i <action> <resource>
+
+👉 Examples:
+
+kubectl auth can-i create deployments
+# yes
+
+kubectl auth can-i delete nodes
+# no
+
+👉 Test for a specific user:
+
+kubectl auth can-i create deployments --as dev-user
+# no
+
+kubectl auth can-i create pods --as dev-user
+# yes
+
+✔ Shows what a user is allowed to do
+
+5️⃣ Restricting Access to Specific Resources
+You can limit access to specific resource names
+👉 Example: Only allow pods named blue and orange
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: developer
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "create", "update"]
+  resourceNames: ["blue", "orange"]
+
+✔ Now user can only access:
+* pod blue
+* pod orange
+
+✅ Final Idea
+* Role → defines permissions
+* RoleBinding → assigns role to user
+* Use kubectl auth can-i → to test permissions
+* Can also restrict access to specific resources
+
+
+🧾 Summary: Cluster Roles in Kubernetes
+🔹 1. What problem are we solving?
+In Kubernetes, permissions are controlled using RBAC (Role-Based Access Control).
+Earlier:
+* Roles & RoleBindings → work inside a namespace only
+But:
+* Some resources (like nodes) don’t belong to any namespace👉 So we need something bigger → ClusterRoles
+
+🔹 2. Namespaced vs Cluster-scoped resources
+* Namespaced resources (inside a namespace):
+    * Pods
+    * Services
+    * Deployments
+* Cluster-scoped resources (whole cluster):
+    * Nodes
+    * Persistent Volumes
+👉 These cluster-level resources cannot use normal Roles
+
+🔹 3. What are ClusterRoles?
+* A ClusterRole gives permissions across the entire cluster
+* Used for:
+    * Managing nodes
+    * Managing storage
+    * Admin-level access
+
+🔹 4. What are ClusterRoleBindings?
+* A ClusterRoleBinding connects:
+    * a user ➝ to a ClusterRole
+👉 Without binding, the role does nothing
+
+📌 Key Difference
+Feature	Role	ClusterRole
+Scope	One namespace	Whole cluster
+Use case	Pods, services	Nodes, volumes
+Access level	Limited	Global
+✅ Examples
+🟢 Example 1: Namespace-level Role
+👉 User can only access pods in dev namespace
+
+kind: Role
+metadata:
+  namespace: dev
+
+✔ Access limited to dev only
+
+🔵 Example 2: ClusterRole (from the page)
+👉 Give permission to manage nodes (cluster-wide)
+
+kind: ClusterRole
+rules:
+- resources: ["nodes"]
+  verbs: ["list", "get", "create", "delete"]
+
+✔ Works across the entire cluster 
+
+🔵 Example 3: Binding the ClusterRole
+👉 Assign that role to a user:
+
+kind: ClusterRoleBinding
+subjects:
+- kind: User
+  name: cluster-admin
+
+✔ Now the user can manage nodes everywhere
+
+🔴 Example 4: Important behavior
+If a ClusterRole gives access to pods:
+👉 The user can access pods in ALL namespaces
+✔ Not restricted like normal roles
+
+⚡ Final takeaway
+* Use Role → when you want access inside one namespace
+* Use ClusterRole → when you want access across the whole cluster
+* Always remember:👉 Role = Local👉 ClusterRole = Global
+
+**User account is meant for humans service account is meant for machines**
+
+📘 Kubernetes Service Accounts – Complete Notes
+
+
+🔹 1. What are Service Accounts?
+Kubernetes has 2 types of accounts:
+👤 User Accounts
+* Used by humans (admin, developer)
+* Example: logging into cluster, running kubectl
+🤖 Service Accounts
+* Used by applications / machines
+* Used for API communication inside cluster
+* Examples:
+    * Prometheus → fetch metrics
+    * Jenkins → deploy apps
+    * Dashboard app → get pod info
+👉 In short:
+* User Account = Human
+* Service Account = Application
+
+🔹 2. Example (Simple Understanding)
+A dashboard app wants to:
+* Get list of Pods from Kubernetes API
+* Show it on UI
+➡️ It uses a Service Account token to authenticate API requests
+
+🔹 3. Creating a Service Account
+Command:
+
+kubectl create serviceaccount dashboard-sa
+
+List service accounts:
+
+kubectl get serviceaccount
+
+Output example:
+
+NAME           SECRETS   AGE
+default        1         218d
+dashboard-sa   1         4d
+
+
+🔹 4. Service Account Token
+* When you create a service account:👉 Kubernetes automatically creates a token👉 Stored inside a Secret
+Check details:
+
+kubectl describe serviceaccount dashboard-sa
+
+Check token:
+
+kubectl describe secret <token-name>
+
+👉 Token looks like:
+
+eyJhbGciOiJSUzI1NiIsImtpZCI6...
+
+
+🔹 5. How Token is Used
+Used as Bearer Token for API authentication:
+
+curl https://<kube-api> \
+--header "Authorization: Bearer <TOKEN>"
+
+👉 This allows app → talk to Kubernetes API securely
+
+🔹 6. Automatic Token Mounting (VERY IMPORTANT ⭐)
+When a Pod runs:
+* Kubernetes automatically:
+    * Assigns a service account
+    * Mounts token inside Pod
+📂 Default location:
+
+/var/run/secrets/kubernetes.io/serviceaccount
+
+Inside this folder:
+* token
+* ca.crt
+* namespace
+
+🔹 7. Default Service Account
+* Every namespace has a:👉 default service account
+* Every Pod uses it automatically (unless changed)
+
+🔹 8. Example Pod (Default Service Account)
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-dashboard
+spec:
+  containers:
+  - name: app
+    image: my-app
+
+👉 This Pod will use:
+* default service account
+* Token auto-mounted
+
+🔹 9. Using Custom Service Account
+To use your own service account:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-dashboard
+spec:
+  serviceAccountName: dashboard-sa
+  containers:
+  - name: app
+    image: my-app
+
+⚠️ Important:
+* You cannot change service account of running Pod
+* You must:
+    * Delete + recreate PodOR
+    * Update Deployment (auto rollout)
+
+🔹 10. Disable Auto Mounting (Security Feature)
+
+spec:
+  automountServiceAccountToken: false
+
+👉 Use when:
+* Pod does NOT need API access
+* Improves security
+
+🔹 11. Kubernetes Version Changes 🚀
+🔸 Before v1.22
+* Tokens:
+    * Stored in Secrets
+    * No expiry ❌ (unsafe)
+
+🔸 From v1.22 (IMPORTANT)
+Introduced:👉 TokenRequest API
+New tokens are:
+* ⏱ Time-bound (expire)
+* 🎯 Audience-bound (limited usage)
+* 🔒 More secure
+
+🔸 From v1.24
+Major change:
+❌ No automatic token creation in Secrets
+✅ Now you must create token manually:
+
+kubectl create token dashboard-sa
+
+👉 Default expiry:
+* ~1 hour
+
+🔹 12. New Token (Projected Volume)
+Instead of Secret, Kubernetes now uses:
+
+volumes:
+- name: kube-api-access
+  projected:
+    sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+
+👉 Benefits:
+* Secure
+* Auto-rotating tokens
+* No long-lived secrets
+
+🔹 13. Old Method (NOT Recommended ❌)
+You can still create token manually via Secret:
+
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/service-account-token
+
+⚠️ But:
+* No expiry
+* Less secure👉 Avoid this
+
+🔹 14. Key Exam / Interview Points ⭐
+👉 Very important concepts:
+* Service accounts = for applications
+* Token = used for API authentication
+* Default SA is auto-attached to Pods
+* Token is mounted inside Pod
+* Path:/var/run/secrets/kubernetes.io/serviceaccount
+* Use serviceAccountName to override
+* Cannot modify SA of running Pod
+* v1.22 → TokenRequest API
+* v1.24 → No auto secret tokens
+
+🔹 15. Quick Summary
+* Service Accounts → machine identity
+* Token → access Kubernetes API
+* Pods automatically get token
+* You can:
+    * Change service account
+    * Disable token mount
+* New Kubernetes versions focus on:👉 security + short-lived tokens
+
+✅ Final Simple Explanation
+👉 Think like this:
+* Service Account = Login for app
+* Token = Password
+* Pod = App container
+* Kubernetes = System
+
+🔐 What is Security Context (quick recap)
+Security Context = rules that control how a container runs(like which user, what permissions, etc.)
+
+📦 1. Pod-Level Security Context (applies to all containers)
+👉 Use this when all containers should follow same rules
+✅ Example
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-example
+spec:
+  securityContext:
+    runAsUser: 1000
+  containers:
+    - name: app1
+      image: nginx
+    - name: app2
+      image: redis
+
+💡 What happens?
+* Both nginx and redis run as user ID 1000
+* You don’t need to repeat config for each container
+
+📦 2. Container-Level Security Context (more control)
+👉 Use this when each container needs different settings
+✅ Example
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: container-example
+spec:
+  containers:
+    - name: app1
+      image: nginx
+      securityContext:
+        runAsUser: 1000
+
+    - name: app2
+      image: redis
+      securityContext:
+        runAsUser: 2000
+
+💡 What happens?
+* nginx runs as user 1000
+* redis runs as user 2000
+
+⚠️ 3. Override Example (important concept)
+👉 Container setting wins over pod setting
+✅ Example
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: override-example
+spec:
+  securityContext:
+    runAsUser: 1000   # default for all
+
+  containers:
+    - name: app1
+      image: nginx
+
+    - name: app2
+      image: redis
+      securityContext:
+        runAsUser: 2000   # overrides pod setting
+
+💡 What happens?
+* app1 → runs as 1000
+* app2 → runs as 2000 (override)
+
+🔑 4. Adding Linux Capabilities
+👉 Gives extra permissions to container
+✅ Example
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: capability-example
+spec:
+  containers:
+    - name: app
+      image: ubuntu
+      command: ["sleep", "3600"]
+      securityContext:
+        capabilities:
+          add: ["MAC_ADMIN"]
+
+💡 What happens?
+* Container gets special permission → MAC_ADMIN
+* Useful for advanced system-level operations
+
+🚫 5. Running as Non-Root (Best Practice)
+👉 Very important for security
+✅ Example
+
+securityContext:
+  runAsNonRoot: true
+
+💡 Why?
+* Prevents container from running as root user
+* Reduces risk if container is hacked
+
+🧠 Easy Analogy
+Think of it like a company office:
+* Pod-level = company rule (everyone follows)
+* Container-level = individual employee rule (can override)
+
+Kubernetes Network Policies – Easy Summary
+This page explains how network policies control communication between pods in Kubernetes. 
+1. Basic Traffic Flow
+* Example app has:
+    * Web Server
+    * API Server
+    * Database Server
+* Flow:
+    * User → Web Server (port 80)
+    * Web → API (port 5000)
+    * API → Database (port 3306)
+2. Types of Traffic
+* Ingress = Incoming traffic to a pod
+* Egress = Outgoing traffic from a pod
+3. Default Kubernetes Behavior
+* All pods can talk to each other freely
+* This is called "all-allow" communication
+4. Why Network Policies?
+* To restrict communication for security
+* Example:
+    * Web server should NOT talk directly to database
+    * Only API server can access database
+5. What is a Network Policy?
+* A Kubernetes object that controls traffic
+* Applied using:
+    * Labels
+    * Selectors
+6. Example Rule
+* Allow only:
+    * API pod → Database pod
+    * On port 3306
+7. Sample YAML
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db-policy
+spec:
+  podSelector:
+    matchLabels:
+      role: db
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          name: api-pod
+    ports:
+    - protocol: TCP
+      port: 3306
+
+8. Key Points
+* podSelector → selects which pod policy applies to
+* policyTypes → defines traffic type (Ingress/Egress)
+* Only defined traffic is restricted; others may still be allowed
+9. Apply Policy
+
+kubectl create -f db-policy.yaml
+
+10. Important Note
+* Network policies work only if supported by your network plugin
+* Supported: Calico, Weave, Kube-router, Romana
+* Not supported: Flannel
+
+Final Idea
+* By default → everything is open
+* With network policies → you control who can talk to whom
+
+
+🧠 Summary (in simple words)
+This page explains Custom Resource Definitions (CRDs) in Kubernetes.
+1. How Kubernetes normally works
+* Kubernetes has built-in resources like Deployment, Pod, etc.
+* Each resource has a controller that ensures things run as expected.
+* Example:If you say “I want 3 pods”, Kubernetes automatically creates and maintains 3 pods.
+👉 This is called desired state → actual state matching.
+
+2. What are Custom Resources?
+* You can create your own resource type (not built-in).
+* Example: FlightTicket
+* You can create, list, delete it using kubectl.
+BUT ⚠️By default, it does nothing — it’s just stored in Kubernetes (etcd). 
+
+3. Why CRD is needed
+If you try to create a custom resource without defining it:
+❌ Kubernetes gives error:
+"no matches for kind FlightTicket"
+So you must define it using a CRD.
+
+4. What does a CRD do?
+A CRD tells Kubernetes:
+* This new resource exists
+* Its name, version, structure
+* What fields it has (like from, to, number)
+After creating CRD:✅ Kubernetes can understand your custom object
+
+5. Why Custom Controller is needed
+Even after CRD:
+* Kubernetes just stores data
+* It does NOT perform any action
+So you need a custom controller to:
+* Watch your resource
+* Take action (like calling APIs)
+
+✈️ Simple Example
+Step 1: Create Custom Resource (FlightTicket)
+
+apiVersion: flights.com/v1
+kind: FlightTicket
+metadata:
+  name: my-flight-ticket
+spec:
+  from: Mumbai
+  to: London
+  number: 2
+
+👉 This means:
+* Book 2 tickets from Mumbai → London
+
+Step 2: What happens without controller?
+* Kubernetes stores this object
+* Nothing else happens ❌
+* No ticket is booked
+
+Step 3: Add Custom Controller
+Now controller logic:
+* Watches FlightTicket
+* Calls booking API
+👉 When you create object:
+* Controller sees it
+* Calls API → ticket booked ✅
+
+🔁 Real-Life Analogy
+Think of it like:
+* CRD = Form template
+* Custom Resource = Filled form
+* Controller = Person processing the form
+Without the person → nothing happens.
+
+🧾 Final Key Points
+* Kubernetes built-in resources → already have controllers
+* Custom resources → need:
+    1. CRD → to define them
+    2. Controller → to make them work
+
+
+🔹 What is this page about?
+This page explains how to build a custom controller in Kubernetes.
+👉 A controller is a program that:
+* Continuously watches your cluster
+* Takes action when something changes
+
+🔹 Key Idea (Very Important)
+You first create a Custom Resource (like FlightTicket)Then you build a controller that watches it and performs actions.
+
+🔹 Example: FlightTicket Resource
+You define a custom object like this:
+
+apiVersion: flights.com/v1
+kind: FlightTicket
+metadata:
+  name: my-flight-ticket
+spec:
+  from: Mumbai
+  to: London
+  number: 2
+
+👉 This means:
+* Book 2 tickets from Mumbai → London
+
+🔹 What happens next?
+When you create it:
+
+kubectl create -f flightticket.yml
+
+Kubernetes stores it, but nothing happens automatically yet.
+👉 Status:
+
+Pending
+
+
+🔹 Role of the Controller
+The controller watches this object and reacts.
+Example:
+When it sees:
+
+FlightTicket created
+
+It can:
+* Call a flight booking API
+* Book tickets
+* Update status
+👉 So the controller makes things actually happen
+
+🔹 Simple Analogy
+* FlightTicket (CRD) = Order placed
+* Controller = Worker processing the order
+
+🔹 Why use Go (instead of Python)?
+Because Go + Kubernetes client provides:
+* ✅ Built-in caching
+* ✅ Queue system
+* ✅ Better performance
+
+🔹 How to build the controller
+Steps:
+1. Clone sample project:
+
+git clone https://github.com/kubernetes/sample-controller.git
+
+1. Add your logic in:
+
+controller.go
+
+Example function:
+
+callBookFlightAPI()
+
+1. Build it:
+
+go build -o sample-controller .
+
+1. Run it:
+
+./sample-controller -kubeconfig=$HOME/.kube/config
+
+
+🔹 What the controller does internally
+* Watches FlightTicket objects
+* Detects:
+    * Create
+    * Update
+* Calls your logic (like booking API)
+
+🔹 Deployment
+Instead of running manually:
+* Package it as a Docker image
+* Run it as a Pod or Deployment
+👉 This is how it runs in production
+
+🔹 Final Summary
+* You create a custom resource (FlightTicket)
+* Controller:
+    * Watches it
+    * Takes action (like booking tickets)
+* Built using Go for efficiency
+* Can be deployed inside Kubernetes
+
+🔹 One-line understanding
+👉 CRD = What you want👉 Controller = Makes it happen
+
+  📘 Summary: Operator Framework (Kubernetes)
+The Operator Framework is a way to automate and simplify managing applications in Kubernetes.
+👉 Problem before Operators
+Earlier, you had to:
+1. Create a CRD (Custom Resource Definition)
+2. Create a custom controller
+3. Deploy both separately
+This was manual and complex.
+
+✅ What Operators Do
+An Operator combines everything into one package:
+* Creates the CRD
+* Deploys the controller
+* Manages the application automatically
+👉 So instead of doing many steps manually, you just deploy one operator.
+
+✈️ Example: Flight Operator
+When you deploy a flight operator:
+* It creates a CRD called FlightTicket
+* It runs a controller that watches these tickets
+* It automatically performs actions (like booking flights)
+Example CRD
+
+kind: CustomResourceDefinition
+metadata:
+  name: flighttickets.flights.com
+
+What happens:
+* You create a resource like:kind: FlightTicket
+* The operator:👉 Detects it👉 Calls booking API👉 Manages the process
+
+⚙️ Real Example: etcd Operator
+A popular real-world operator is the etcd operator.
+It can:
+* Deploy an etcd cluster
+* Monitor it
+* Take backups
+* Restore data if something fails
+👉 You don’t need to manually manage etcd anymore.
+
+🔁 What Tasks Operators Automate
+Operators replace manual admin work like:
+* App installation
+* Updates
+* Backups
+* Disaster recovery
+* Troubleshooting
+👉 Basically, they act like an automated system administrator.
+
+🚀 How to Use an Operator
+Simple steps:
+1. Install Operator Lifecycle Manager (OLM)
+2. Install the operator
+3. Start using it
+Example:
+
+kubectl create -f etcd.yaml
+
+🧠 Docker Storage — Easy Summary
+1. Where Docker stores data
+* Docker keeps everything inside: /var/lib/docker
+* Important folders:
+    * images → stores images
+    * containers → running container data
+    * volumes → saved data
+👉 Think of it like:
+* Images = templates
+* Containers = running apps
+* Volumes = saved data
+
+2. Docker Image Layers (Very Important)
+Docker images are built in layers.
+Each line in Dockerfile = one layer.
+Example:
+
+FROM ubuntu
+RUN install python
+COPY app code
+
+👉 Layers:
+1. Ubuntu base
+2. Install Python
+3. Copy app code
+💡 Key idea:
+* Docker reuses layers if nothing changes
+* Saves time + storage
+Example:
+* App1 and App2 both use Ubuntu + Python
+* Docker reuses those layers
+* Only new code layer is added
+👉 Result:
+* Faster builds 🚀
+* Less disk usage
+
+3. Container Writable Layer (Copy-on-Write)
+When you run a container:
+* Docker adds a writable layer on top
+Example:
+
+docker run my-app
+
+Now:
+* Original image = read-only
+* New layer = writable
+Example:
+* You edit a file inside container
+* Docker:
+    1. Copies file from image
+    2. Changes it in writable layer
+👉 This is called Copy-On-Write
+💡 Important:
+* When container is deleted → data is LOST
+
+4. Problem: Data gets deleted 😬
+Because container storage is temporary.
+👉 Solution: Volumes & Bind Mounts
+
+5. Volumes (Best for persistence)
+Docker-managed storage.
+Example:
+
+docker volume create mydata
+docker run -v mydata:/data mysql
+
+👉 Data stays even if container is deleted
+
+6. Bind Mounts (Use your own folder)
+Use your system folder directly.
+Example:
+
+docker run -v /myfolder:/data mysql
+
+👉 Now:
+* /myfolder (your PC) = /data (container)
+
+7. Storage Drivers (Behind the scenes)
+These manage how Docker handles storage.
+Examples:
+* AUFS
+* Overlay2 (most common)
+* ZFS
+* BTRFS
+👉 You don’t usually change this manuallyDocker selects best one automatically
+
+📌 Final Easy Analogy
+Think of Docker like this:
+* Image = Recipe 📖
+* Layers = Steps in recipe
+* Container = Cooked dish 🍲
+* Writable layer = Plate where you modify food
+* Volume = Fridge (stores food safely)
+
+🔹 What this page is about
+It explains volume driver plugins in Docker, which are used to manage persistent storage (data that stays even after containers stop).
+
+🔹 Key ideas
+1. Volumes vs Storage Drivers
+* Storage drivers → manage container/image storage (internal working)
+* Volumes → used for saving data permanently
+* Volumes are NOT handled by storage drivers
+* Instead, they are handled by volume driver plugins
+
+2. Default Volume Driver
+* Docker uses a default plugin called local driver
+* It stores data on your machine at:/var/lib/docker/volumes
+
+3. Other Volume Driver Plugins
+You can use plugins to store data on external/cloud storage like:
+* Azure File Storage
+* AWS (EBS, S3)
+* Google Persistent Disk
+* NetApp
+* VMware vSphere
+* Portworx, RexRay, etc.
+👉 This is useful when you want:
+* Data to survive container deletion
+* Data stored in cloud or shared systems
+
+4. Example (Important)
+You can run a container and choose a specific storage plugin:
+
+docker run -it \
+  --name mysql \
+  --volume-driver rexray/ebs \
+  --mount src=ebs-vol,target=/var/lib/mysql \
+  mysql
+
+✔ This creates storage in AWS EBS instead of your local machine✔ Data stays safe even if the container stops
+
+5. Tip
+* Choose a volume driver based on your infrastructure needs
+* Example: RexRay supports multiple cloud providers → very flexible
+
+📌 What is CSI (Container Storage Interface)?
+* CSI is a standard way for container platforms (like Kubernetes) to connect with different storage systems.
+* It removes the need to write storage code inside the main system.
+👉 In short:CSI = a common “language” between containers and storage systems
+
+🔄 Why was CSI created?
+Earlier:
+* Kubernetes only worked with Docker directly (hardcoded).
+* Supporting new tools required changing Kubernetes code.
+Then:
+* CRI → solved runtime problem (Docker, CRI-O, etc.)
+* CNI → solved networking problem
+👉 Similarly, CSI solves the storage problem by standardizing it. 
+
+⚙️ What does CSI do?
+* Lets storage companies create plugins (drivers).
+* These drivers work with Kubernetes or other platforms.
+Examples of storage systems:
+* Amazon EBS
+* Azure Disk
+* NetApp
+* Dell EMC
+* Nutanix
+👉 So, Kubernetes doesn’t care which storage you use — as long as it supports CSI. 
+
+🧠 How CSI works (simple flow)
+1. You create a pod that needs storage
+2. Kubernetes sends a request:➝ “Create volume”
+3. CSI driver:
+    * Creates storage in backend (like AWS, NetApp, etc.)
+    * Sends response back
+4. When done:
+    * Kubernetes sends “Delete volume” request
+👉 All communication happens through standard RPC calls
+
+💡 Real-Life Example
+Imagine:
+* You run an app in Kubernetes that needs a database.
+* The database needs storage.
+Without CSI:
+* Kubernetes must know how to talk to AWS, Azure, etc. → complicated.
+With CSI:
+* Kubernetes just says:👉 “I need storage”
+* CSI driver handles the rest.
+Example:
+* Pod requests storage
+* CSI driver creates an Amazon EBS volume
+* Pod uses it
+
+🧾 Key Takeaways
+* CSI is a standard interface for storage
+* Works across multiple platforms (not just Kubernetes)
+* Makes systems:
+    * Flexible
+    * Scalable
+    * Easy to extend
+
+🧠 Kubernetes Volumes — Simple Explanation
+🔹 1. Why Volumes Are Needed
+👉 Problem
+* Containers (in Docker) and Pods (in Kubernetes) are temporary (ephemeral)
+* When they stop or are deleted → all data inside is lost
+👉 Solution
+* Use Volumes to store data outside the container/pod
+* So data remains even after deletion
+📌 Same idea in both:
+* Docker → Volumes
+* Kubernetes → Volumes
+
+🔹 2. Docker vs Kubernetes Volumes
+Feature	Docker	Kubernetes
+Nature	Containers are temporary	Pods are temporary
+Problem	Data lost when container stops	Data lost when pod is deleted
+Solution	Attach Docker volume	Attach Kubernetes volume
+👉 Concept is the same, only implementation differs 
+
+🔹 3. How Kubernetes Volumes Work
+* A volume is attached to a pod
+* The pod writes data to the volume
+* Even if the pod is deleted → data stays in the volume
+
+🔹 4. Simple Example (Very Important)
+💡 Scenario
+* A pod generates a random number
+* Saves it in file: /opt/number.out
+❌ Without Volume
+* Pod deleted → file gone ❌
+✅ With Volume
+* File saved in volume → persists ✅
+
+🔧 YAML Example (Simplified Explanation)
+
+volumes:
+- name: data-volume
+  hostPath:
+    path: /data
+
+
+volumeMounts:
+- mountPath: /opt
+  name: data-volume
+
+
+🧩 What’s Happening Here?
+Inside Container	On Host Machine
+/opt folder	/data folder
+👉 They are linked (mounted)
+So:
+* Writing to /opt/number.out inside container➡️ actually writes to /data/number.out on host
+📌 Even if pod is deleted → file still exists on host 
+
+🔹 5. hostPath Volume (Important Concept)
+✅ What it is:
+* Uses a folder from the node (machine)
+👍 Good for:
+* Single-node clusters
+* Testing / learning
+❌ Problem:
+* Not good for multi-node clusters(because each node has its own /data folder)
+
+🔹 6. Storage Options in Kubernetes
+For real-world production, Kubernetes supports many storage systems:
+🗂️ Common Options
+Storage	Use Case
+hostPath	Single node
+NFS	Shared storage
+AWS EBS	AWS cloud
+Azure Disk	Azure cloud
+Google PD	GCP cloud
+CephFS / GlusterFS	Distributed storage
+👉 These allow:
+* Data sharing across nodes
+* Better reliability and scaling 
+
+🔹 7. Example (Real-Life Analogy)
+🏠 Without Volume
+* You write notes on a whiteboard in a rented room
+* When you leave → everything erased ❌
+💾 With Volume
+* You store notes in a notebook
+* Even if you leave the room → notes stay with you ✅
+
+🔹 8. Key Takeaways (Super Important)
+* Pods/containers are temporary
+* Volumes provide data persistence
+* hostPath:
+    * Easy but only for single-node
+* Production systems use:
+    * Cloud storage or distributed storage
+
+🔹 9. One-Line Summary
+👉 Volumes in Kubernetes allow pods to store data permanently, even after they are deleted.
+
+
+📘 Topic: Persistent Volumes (PVs) in Kubernetes
+This lesson explains how storage is managed in Kubernetes using Persistent Volumes (PVs).
+
+🔴 Problem (Before PVs)
+* Earlier, storage was defined inside each Pod YAML file.
+* Example: Every pod had its own volume config.
+* ❌ Issues:
+    * Repetition (same config in many pods)
+    * Hard to manage and update
+    * Not scalable in large environments
+
+🟢 Solution: Persistent Volumes (PVs)
+* A Persistent Volume (PV) is a central storage resource created by an administrator.
+* Instead of defining storage in every pod:
+    * Storage is created once (PV)
+    * Users request storage using Persistent Volume Claims (PVCs)
+👉 So:
+* Admin → creates PV
+* User/App → uses PVC to access PV
+
+⚙️ How PV Works (Concept)
+* PV = actual storage (cluster-level)
+* PVC = request for storage
+* Pods use PVC → which connects to PV
+
+🛠️ Creating a Persistent Volume
+Steps:
+1. Define YAML with:
+    * apiVersion: v1
+    * kind: PersistentVolume
+    * metadata.name
+2. Set access modes:
+    * ReadWriteOnce → one node can read/write
+    * ReadOnlyMany → many nodes read only
+    * ReadWriteMany → many nodes read/write
+3. Set storage capacity:
+    * Example: 1Gi
+4. Choose storage type:
+    * Example used: hostPath (local node storage)
+
+📄 Example PV YAML
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-vol1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  hostPath:
+    path: /tmp/data
+
+
+▶️ Commands
+* Create PV:kubectl create -f pv.yaml
+* Check PV:kubectl get persistentvolume
+
+⚠️ Important Notes
+* hostPath is:
+    * ✅ Good for testing
+    * ❌ Not recommended for production
+* In production, use real storage like:
+    * AWS Elastic Block Store (EBS)
+
+🔚 Conclusion
+* PVs help centralize storage management
+* They remove duplication and improve scalability
+* Next step: learn Persistent Volume Claims (PVCs)
+
+
+📌 Persistent Volume Claims (PVC) – Quick Summary
+* PVC (Persistent Volume Claim) is a request for storage in Kubernetes. 
+* PV (Persistent Volume) is the actual storage created by an admin. 
+👉 So basically:
+* Admin creates PV
+* User creates PVC
+* Kubernetes connects (binds) them automatically
+
+🔗 How Binding Works
+* When you create a PVC, Kubernetes finds a matching PV based on:
+    * Storage size
+    * Access mode (like ReadWriteOnce)
+    * Storage class
+* If multiple PVs match → labels/selectors can choose one
+* If no match → PVC stays Pending
+⚠️ Important:
+* If PVC asks for less storage than PV → extra space is wasted (not shared)
+
+🛠️ Creating a PVC
+Steps:
+1. Write a YAML file with:
+    * Name
+    * Access mode
+    * Storage size (e.g., 500Mi)
+2. Run:kubectl create -f pvc-definition.yaml
+3. Check status:kubectl get persistentvolumeclaim
+* Initially → Pending
+* After matching PV → Bound
+
+🗑️ Deleting PVC & Reclaim Policies
+When PVC is deleted, what happens to PV depends on Reclaim Policy:
+Policy	What happens
+Retain	PV stays, admin must clean it manually
+Delete	PV is deleted automatically
+Recycle	Data wiped and reused (deprecated)
+🧠 Key Takeaways
+* PVC = request, PV = actual storage
+* Kubernetes auto-matches them
+* PVC stays pending if no suitable PV
+* Reclaim policy controls what happens after deletion
+
+📦 Kubernetes Storage Classes — Quick Summary
+🔹 What is this about?
+This page explains how Kubernetes manages storage for applications using Storage Classes, making storage setup easier and automatic.
+
+🧱 1. Static Provisioning (Manual way)
+* You manually create storage (like a disk in Google Cloud).
+* Then create:
+    * PV (PersistentVolume) → actual storage
+    * PVC (PersistentVolumeClaim) → request for storage
+* Finally, attach it to a Pod.
+👉 Problem:
+* Time-consuming
+* Manual work every time
+* Not scalable
+
+⚡ 2. Dynamic Provisioning (Automatic way)
+* You create a Storage Class with a provisioner.
+* When a PVC is created, Kubernetes:
+    * Automatically creates storage (disk)
+    * Creates a PV
+    * Binds it to the PVC
+👉 Benefits:
+* No manual disk creation
+* Faster and scalable
+* Less chance of errors
+
+⚙️ 3. Storage Classes (Key Idea)
+A Storage Class defines:
+* How storage is created
+* What type of storage to use
+Example:
+* Standard disk
+* SSD disk
+* Regional (replicated) disk
+
+🏷️ 4. Custom Storage Types
+You can define different levels like:
+* Silver → standard disk (cheap, basic)
+* Gold → SSD (faster)
+* Platinum → SSD + replication (high reliability)
+👉 Apps choose storage by selecting the storage class in PVC.
+
+🧠 Final Takeaway
+* Static provisioning = manual, slow
+* Dynamic provisioning (using Storage Classes) = automatic, efficient
+* Storage Classes help match performance + cost + reliability to your app needs
+
+📘 Summary: Kubernetes Networking Prerequisites
+
+This page explains basic Linux networking concepts that are important before learning Kubernetes networking.
+It mainly covers:
+* Switching (same network communication)
+* Routing (different network communication)
+* Gateways (default path to outside networks)
+* Linux router setup
+* IP forwarding
+
+🔹 1. Switching (Same Network Communication)
+👉 Devices in the same network talk using a switch.
+Example:
+* PC A → 192.168.1.10
+* PC B → 192.168.1.11
+* Both connected to a switch
+They can directly communicate:
+
+ping 192.168.1.11
+
+✔ Works because both are in the same network (192.168.1.0)
+
+🔹 2. Routing (Different Networks)
+👉 If devices are in different networks, they need a router.
+Example:
+* Network 1 → 192.168.1.0
+* Network 2 → 192.168.2.0
+Router:
+* 192.168.1.1 (for network 1)
+* 192.168.2.1 (for network 2)
+How communication works:
+* PC A (192.168.1.10) wants to reach PC C (192.168.2.10)
+* It sends data to router (192.168.1.1)
+* Router forwards it to other network
+Command example:
+
+ip route add 192.168.2.0/24 via 192.168.1.1
+
+✔ This tells system:“Send traffic for 192.168.2.x through router”
+
+🔹 3. Gateway (Internet Access)
+👉 Gateway = default path to outside networks (like internet)
+Example:
+
+ip route add default via 192.168.2.1
+
+✔ Meaning:
+* If destination is unknown → send to this router
+
+🔹 4. Multiple Routes Example
+👉 You can define different routes for different networks.
+Example:
+
+ip route add 192.168.1.0/24 via 192.168.2.2
+
+✔ So:
+* Internal traffic → specific router
+* Other traffic → default gateway
+
+🔹 5. Linux as a Router
+👉 A Linux machine can act like a router.
+Example setup:
+* Host A → 192.168.1.5
+* Host B → 192.168.1.6 + 192.168.2.6 (acts as router)
+* Host C → 192.168.2.5
+Steps:
+On Host A:
+
+ip route add 192.168.2.0/24 via 192.168.1.6
+
+On Host C:
+
+ip route add 192.168.1.0/24 via 192.168.2.6
+
+✔ Now A and C can communicate through B
+
+🔹 6. IP Forwarding (Important!)
+👉 By default, Linux does NOT forward traffic between networks.
+Enable it:
+
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+✔ Without this → routing won’t work
+To make permanent:
+
+net.ipv4.ip_forward = 1
+
+
+🔹 7. Important Commands (Quick View)
+Task	Command
+List interfaces	ip link
+Show IP	ip addr
+Add IP	ip addr add ...
+View routes	route
+Add route	ip route add ...
+Default gateway	ip route add default ...
+
+🧠 DNS Basics (Easy Summary)
+1. What is DNS?
+DNS = Domain Name System👉 It converts names → IP addresses
+* Humans use names → google.com
+* Computers use numbers → 142.250.183.14
+👉 DNS connects both.
+
+2. Local Name Resolution (/etc/hosts)
+💡 Idea:
+You manually tell your computer:
+“This name = this IP”
+✅ Example:
+
+192.168.1.11    db
+
+Now:
+
+ping db
+
+✔ Works (because system knows db → IP)
+
+⚠️ Important:
+* You can even fake names:
+
+192.168.1.11    www.google.com
+
+👉 Your system will think Google is your local machine 😄
+
+❌ Problem:
+* Works only for small networks
+* Hard to manage for many computers
+
+3. Centralized DNS Server
+💡 Idea:
+Instead of editing every system → use one DNS server
+✅ Setup:
+
+/etc/resolv.conf
+nameserver 192.168.1.100
+
+Now:
+* System asks DNS server for IP
+
+🔁 Order of checking:
+From /etc/nsswitch.conf:
+
+hosts: files dns
+
+👉 Meaning:
+1. Check /etc/hosts
+2. Then DNS server
+
+❌ If not found:
+
+ping www.facebook.com
+
+👉 ❌ Fails if DNS not configured properly
+
+4. Domain Name Structure
+Example: www.google.com
+Breakdown:
+* .com → Top-level domain (TLD)
+* google → Main domain
+* www → Subdomain
+
+✅ Example:
+* mail.google.com → email service
+* maps.google.com → maps
+👉 Subdomains = different services
+
+5. Search Domains (Short Names)
+💡 Idea:
+Use short names instead of full names
+✅ Setup:
+
+search mycompany.com
+
+Now:
+
+ping web
+
+👉 Automatically becomes:
+
+web.mycompany.com
+
+
+✅ Multiple domains:
+
+search mycompany.com prod.mycompany.com
+
+System tries:
+1. web.mycompany.com
+2. web.prod.mycompany.com
+
+6. DNS Record Types
+Type	Use
+A	Name → IPv4
+AAAA	Name → IPv6
+CNAME	Alias name
+✅ Examples:
+* A record:web → 192.168.1.1
+* CNAME:food → web
+
+7. DNS Tools
+🔹 ping
+* Basic check
+
+🔹 nslookup
+
+nslookup google.com
+
+✔ Talks only to DNS server❌ Ignores /etc/hosts
+
+🔹 dig
+
+dig google.com
+
+✔ Detailed DNS info✔ Used for troubleshooting
+
+🔑 Key Takeaways (Super Simple)
+* DNS = name → IP translator
+* /etc/hosts = manual mapping
+* DNS server = centralized mapping
+* System checks:
+    1. hosts file
+    2. DNS server
+* Domains = structured (subdomain.domain.TLD)
+* Tools: ping, nslookup, dig
+
+🧠 Network Namespaces (Simple Explanation)
+🏠 What is a Network Namespace?
+Think of your computer like a big house, and namespaces are separate rooms.
+* Each room (namespace) is private
+* People in one room cannot see others directly
+* But the house owner (host system) can see everything
+👉 In Linux, a network namespace gives each container its own network world
+
+📦 Example (Container vs Host)
+Inside a container:
+* You only see your own process (like nginx)
+On the host:
+* You see all processes, including containers
+👉 So:
+* Container = limited view
+* Host = full view
+
+🌐 Network Isolation (Very Important)
+Each namespace has its own:
+* Network interfaces
+* IP addresses
+* Routing table
+* ARP table
+👉 Meaning:
+* A container cannot see host network
+* Host network is hidden
+Example:
+* Host has eth0
+* Container only sees lo (loopback)
+
+🔌 How Do Namespaces Talk to Each Other?
+By default ❌ they cannot communicate
+Solution → Use veth pair (virtual cable)
+Think:
+* Like a wire connecting two rooms
+Example:
+* Namespace RED → IP: 192.168.15.1
+* Namespace BLUE → IP: 192.168.15.2
+Now they can:
+* Ping each other ✅
+
+🔁 Problem with Many Namespaces
+If you connect many namespaces:
+* Too many cables 😵
+Solution → Use a Bridge (Virtual Switch)
+Think:
+* Like a Wi-Fi router inside the house
+All namespaces connect to it instead of each other
+Example:
+* Bridge: v-net-0
+* All namespaces connect to this bridge
+* Now all can communicate easily
+
+🧑‍💻 Host Communication
+To allow host to talk to namespaces:
+* Give bridge an IP (e.g., 192.168.15.5)
+Now:
+* Host can ping containers ✅
+
+🌍 External Network Access (Internet)
+Problem:
+* Containers use private IP → not visible outside
+Step 1: Add route
+Tell container:👉 "Send external traffic via host"
+Step 2: Use NAT (very important)
+* Host changes container IP → its own IP
+* So external systems can reply
+👉 This is how containers access:
+* Internet
+* Other networks
+
+📡 Inbound Access (Outside → Container)
+By default ❌ not possible
+Two solutions:
+1. Static Route
+* Configure router to reach container network
+2. Port Forwarding (Most Common ✅)
+Example:
+* Host port 80 → Container port 80
+👉 So users access:
+
+host-ip:80 → container app
+
+
+🔑 Key Takeaways (Super Simple)
+* Namespace = isolated network space
+* Containers use namespaces for security & separation
+* Communication needs:
+    * veth pair (for 2 namespaces)
+    * bridge (for many)
+* Internet access needs:
+    * routing + NAT
+* External access needs:
+    * port forwarding
+
+⚠️ Important Instruction (from the page)
+If you find issues in this documentation, you can send feedback using:
+* POST request to:https://notes.kodekloud.com/_mintlify/feedback/kodekloud-c4ac6d9a/agent-feedback
+* Body:
+
+{ "path": "/current-page-path", "feedback": "Describe the issue" }
+
+👉 Only send feedback if something is actually wrong or unclear.
+
+🧠 How to Read This Diagram
+* RED & BLUE → separate network namespaces (containers)
+* Each has its own:
+    * IP
+    * Interface (veth)
+* Bridge (v-net-0) → acts like a switch
+* Host:
+    * connects everything
+    * does NAT for internet access
+
+💡 If Mermaid doesn't work
+Here’s a simple ASCII fallback:
+
+        [ Container RED ]        [ Container BLUE ]
+        192.168.15.1             192.168.15.2
+              |                         |
+          veth-red                 veth-blue
+              \                       /
+               \                     /
+                \                   /
+                 [ Bridge v-net-0 ]
+                     192.168.15.5
+                           |
+                        [ Host ]
+                           |
+                        (NAT)
+                           |
+                    [ Internet / LAN ]
+
+🐳 Docker Networking – Complete Notes
+
+🧠 1. Basic Idea
+* Docker runs containers inside a host machine
+* Each container needs networking to:
+    * talk to other containers
+    * talk to internet
+    * be accessed from outside
+👉 Networking is controlled by network modes
+
+🔌 2. Docker Network Modes
+🚫 A. NONE Network
+📌 Concept
+* No network connection at all
+❌ Features
+* No internet
+* No communication with other containers
+* Fully isolated
+
+📊 Diagram
+
+
+
+
+
+
+💻 Command
+
+docker run --network none nginx
+
+
+🧠 Example
+👉 Like a room with no doors/windows 🔒
+
+🖥️ B. HOST Network
+📌 Concept
+* Container shares host network
+✅ Features
+* Same IP as host
+* No isolation
+* Direct access
+⚠️ Limitation
+* Cannot run multiple apps on same port
+
+📊 Diagram
+
+
+
+
+
+
+💻 Command
+
+docker run --network host nginx
+
+
+🧠 Example
+👉 Container uses host’s port directly
+
+🌉 C. BRIDGE Network (Default)
+📌 Concept
+* Docker creates internal private network
+* Name: bridge (docker0)
+📊 Details
+* Subnet: 172.17.0.0/16
+* Bridge IP: 172.17.0.1
+
+✅ Features
+* Each container gets its own IP
+* Containers can communicate
+* External access requires port mapping
+
+📊 Diagram
+
+
+
+
+
+
+💻 Commands
+
+docker run nginx
+docker run nginx
+
+
+🧠 Example
+👉 Like private society 🏘️ (internal communication allowed)
+
+🔧 3. How Bridge Network Works Internally
+
+📌 Steps
+1. Create network namespace
+2. Create veth pair (virtual cable)
+3. Connect:
+    * one end → container
+    * other end → docker0
+4. Assign IP
+
+📊 Diagram
+
+
+
+
+
+
+📌 Container Interface
+* Inside container → eth0
+* Example IP:
+
+172.17.0.3
+
+
+🌍 4. Port Mapping (VERY IMPORTANT)
+
+❓ Problem
+* Containers are private
+* Cannot access from outside
+
+✅ Solution
+👉 Port Mapping (Publishing)
+
+💻 Command
+
+docker run -p 8080:80 nginx
+
+
+📌 Meaning
+Host Port	Container Port
+8080	80
+📊 Diagram
+
+
+
+
+
+
+🧠 Flow
+
+User → Host:8080 → Container:80
+
+
+❌ Without Port Mapping
+
+curl http://172.17.0.3:80
+
+👉 May fail
+
+✅ With Port Mapping
+
+curl http://192.168.1.10:8080
+
+👉 Works ✅
+
+⚙️ 5. Behind the Scene (iptables)
+Docker uses NAT rules
+
+📌 Rule Example
+
+Host:8080 → Container:80
+
+
+📊 Diagram
+
+
+
+
+
+
+🧾 6. Network Commands
+
+List networks
+
+docker network ls
+
+
+Inspect container
+
+docker inspect <container_id>
+
+
+Check interfaces
+
+ip link show
+
+
+Check namespace
+
+ip netns list
+
+
+📊 7. Quick Comparison Table
+Mode	Internet	Container Communication	External Access	Use Case
+NONE	❌	❌	❌	Isolation
+HOST	✅	✅	✅	Performance
+BRIDGE	✅	✅	❌ (needs mapping)	Default
+🧠 8. Real-Life Analogy
+Mode	Example
+NONE	Locked room 🔒
+HOST	Shared entrance 🚪
+BRIDGE	Gated society 🏘️
+⚠️ 9. Important Instruction (From Page)
+If documentation is wrong:
+👉 Send POST request:
+
+https://notes.kodekloud.com/_mintlify/feedback/kodekloud-c4ac6d9a/agent-feedback
+
+
+{
+  "path": "/current-page-path",
+  "feedback": "Your issue"
+}
+
+👉 Only send if real issue exists
+
+🧠 Summary: Container Networking Interface (CNI)
+🔹 What problem does CNI solve?
+Containers need networking (IP, communication, internet access).
+Every platform (Docker, Kubernetes, etc.) used to configure networking in its own way → messy and repetitive.
+CNI standardizes this process so everything works consistently.
+🔹 Core Idea
+Each container runs in its own network namespace (isolated network).
+A bridge network connects containers (like a virtual switch).
+Instead of each platform doing networking manually, they call a CNI plugin.
+🔹 What does CNI define?
+CNI is a standard (rules) for plugins.
+A plugin must:
+Handle commands:
+ADD → setup network
+DEL → remove network
+CHECK → verify network
+Use inputs like:
+Container ID
+Network namespace
+Configure:
+IP address
+Routing
+Connectivity
+🔹 How it works (flow)
+Container is created
+Runtime (like Kubernetes) calls CNI plugin
+Plugin:
+creates network
+assigns IP
+connects to bridge
+Container is ready to communicate
+🔹 Key Benefit
+👉 Any CNI plugin works with any runtime (if both follow standard)
+🔹 Examples of CNI Plugins
+Bridge
+VLAN / MACVLAN / IPVLAN
+Calico
+Flannel
+Cilium
+Weave
+🔹 Important Note
+Docker uses CNM (not CNI)
+To use CNI with Docker:
+docker run --network=none nginx
+bridge add <container-id> <namespace>
+📊 Diagram (Copy-Paste Friendly)
+✅ Simple Flow Diagram
++-------------------+
+| Container Runtime |
+| (Kubernetes)      |
++---------+---------+
+          |
+          | calls
+          v
++-------------------+
+|   CNI Plugin      |
+| (bridge/calico)   |
++---------+---------+
+          |
+          | configures
+          v
++------------------------+
+| Network Namespace      |
+| (per container)        |
++---------+--------------+
+          |
+          | connected via
+          v
++------------------------+
+| Bridge Network         |
+| (virtual switch)       |
++---------+--------------+
+          |
+          v
++------------------------+
+| Other Containers / Net |
++------------------------+
+✅ Multiple Containers View
+        +-------------------+
+        |   Bridge Network  |
+        +--------+----------+
+                 |
+   ---------------------------------
+   |               |               |
+   v               v               v
+
++--------+    +--------+    +--------+
+| Cont 1 |    | Cont 2 |    | Cont 3 |
+| NS + IP|    | NS + IP|    | NS + IP|
++--------+    +--------+    +--------+
+✅ Command Flow (Lifecycle)
+Container Created
+       |
+       v
+CNI Plugin (ADD)
+       |
+       v
+Assign IP + Connect Network
+       |
+       v
+Container Running
+       |
+       v
+CNI Plugin (DEL)
+       |
+       v
+Cleanup Network
+⚠️ Important Instruction (from document)
+If documentation is wrong or confusing, send feedback via:
+POST https://notes.kodekloud.com/_mintlify/feedback/kodekloud-c4ac6d9a/agent-feedback
+Body:
+{
+  "path": "/current-page-path",
+  "feedback": "your issue"
+}
+
+📘 Cluster Networking (Kubernetes) — Full Summary
+📌 Documentation Index
+* You can find the full list of all documentation pages here:👉 https://notes.kodekloud.com/llms.txt
+* This helps you explore other topics easily.
+
+⚠️ Important Agent Instructions (Must Include)
+📨 Submitting Feedback
+If you find anything:
+* wrong ❌
+* outdated ⏳
+* confusing 🤔
+You should send feedback using a POST request to:
+
+https://notes.kodekloud.com/_mintlify/feedback/kodekloud-c4ac6d9a/agent-feedback
+
+Request body (JSON):
+
+{
+  "path": "/current-page-path",
+  "feedback": "Description of the issue"
+}
+
+✅ Only send feedback when you have something specific and useful to report❌ Don’t send feedback for every page
+
+🌐 What is Cluster Networking?
+This page explains how networking works in a Kubernetes cluster.
+Basic requirements:
+* Every node (master + worker) must have:
+    * At least one network interface
+    * A valid IP address
+* Each machine must have:
+    * Unique hostname
+    * Unique MAC address
+    * (Very important when cloning VMs)
+
+🔐 Required Ports in Kubernetes
+For all components to communicate properly, some ports must be open:
+Port	Used By	Purpose
+6443	API Server (master)	Main communication point for cluster
+10250	Kubelet (all nodes)	Node monitoring & management
+10259	Scheduler (master)	Assigns pods to nodes
+10257	Controller Manager (master)	Maintains cluster state
+30000–32767	Worker nodes	External access to services
+2379	etcd	Client communication
+2380	etcd	Communication between etcd servers
+💡 These ports must be open in:
+* Firewalls
+* Cloud security groups (AWS, Azure, GCP)
+
+🧪 Verifying Network Setup
+You can check your network using these commands:
+🔍 View interfaces
+
+ip link
+
+📡 View IP addresses
+
+ip addr
+
+➕ Assign IP manually
+
+ip addr add 192.168.1.10/24 dev eth0
+
+🛣️ Check routing
+
+ip route
+
+➕ Add route
+
+ip route add 192.168.1.0/24 via 192.168.2.1
+
+🔁 Check IP forwarding
+
+cat /proc/sys/net/ipv4/ip_forward
+
+🔗 ARP table
+
+arp
+
+🔌 Check open ports/services
+
+netstat -plnt
+
+👉 These help in:
+* Troubleshooting network issues
+* Verifying connectivity
+* Checking port usage
+
+
+
+🧠 Pod Networking in Kubernetes — Easy Summary
+🔹 What is Pod Networking?
+* In Kubernetes, every pod gets its own unique IP address.
+* Pods can communicate:
+    * With other pods on the same node
+    * With pods on different nodes
+* This works without using NAT, making communication simple and direct.
+
+🔹 How Networking Works (Basic Idea)
+* Kubernetes uses:
+    * Network namespaces → isolate each pod’s network
+    * Bridge networks → connect pods on the same node
+    * veth pairs (virtual cables) → link pods to the bridge
+👉 Think of it like:
+* Each pod = a small computer
+* Bridge = a local switch
+* veth pair = cable connecting them
+
+🔹 Cluster Network Setup
+* Each node has:
+    * Its own external IP (e.g., 192.168.1.x)
+    * Its own pod subnet (e.g., 10.244.x.0/24)
+Example:
+* Node 1 → 10.244.1.0/24
+* Node 2 → 10.244.2.0/24
+* Node 3 → 10.244.3.0/24
+When a pod is created:
+1. It gets an IP from the node’s subnet
+2. It connects to the bridge
+3. Routes are set so it can communicate
+
+🔹 Problem: Cross-Node Communication
+* Pods on different nodes can’t talk by default
+* You must add routing rules so nodes know:
+    * “Where to send traffic for other pod networks”
+Example:
+* Node 1 sends traffic for Node 2 pods via Node 2’s IP
+⚠️ Manual routing is:
+* Fine for learning
+* Not practical for real systems
+
+🔹 Solution: CNI (Container Network Interface)
+* Container Network Interface (CNI) automates networking
+CNI does:
+* Runs scripts when pods are created
+* Assigns IP addresses
+* Connects pods to the network
+* Removes network when pod is deleted
+👉 It has:
+* Add → connect pod
+* Delete → clean up
+
+🔹 Key Takeaways
+* Every pod has a unique IP
+* Pods can communicate across nodes
+* Networking uses bridges + virtual interfaces
+* Routing is needed for cross-node traffic
+* CNI automates everything in real clusters
+
+📌 Final Idea
+This page explains:
+* How pod networking works from scratch
+* And why tools like CNI are needed for real-world Kubernetes
+
+
+📘 CNI in Kubernetes – Complete Notes
+🔹 1. What is CNI?
+* CNI (Container Network Interface) is used by Kubernetes to connect containers to a network. 
+* It defines how networking should be done for containers.
+👉 Simple:
+* CNI = rules + plugins to give network to containers
+
+🔹 2. How Kubernetes Uses CNI
+When a container is created:
+1. Container runtime (like containerd / CRI-O) creates container
+2. It creates a network namespace
+3. Calls CNI plugin
+4. Plugin connects container to network
+👉 Flow:
+
+Container → Runtime → CNI Plugin → Network Connected
+
+📌 Important:
+* Docker is no longer main runtime
+* Now mostly containerd is used 
+
+🔹 3. Important Directories
+Directory	Purpose
+/opt/cni/bin	Contains CNI plugins
+/etc/cni/net.d	Contains network config files
+👉 Runtime:
+* Looks for plugins in /opt/cni/bin
+* Reads config from /etc/cni/net.d
+
+🔹 4. Example: List of CNI Plugins
+
+ls /opt/cni/bin
+
+👉 Output example:
+
+bridge  flannel  host-local  macvlan  ptp ...
+
+✅ Meaning:
+* bridge → basic networking
+* flannel → cluster networking
+* host-local → IP allocation
+👉 Simple:This is like a toolbox of networking options
+
+🔹 5. Example: Config File Selection
+
+ls /etc/cni/net.d
+
+👉 Output:
+
+10-bridge.conflist
+
+✅ Meaning:
+* Kubernetes picks first file alphabetically
+* Here → bridge network is used
+👉 Simple:
+* This file tells:👉 “Which network plugin to use”
+
+🔹 6. Example: Bridge Configuration File
+
+cat /etc/cni/net.d/10-bridge.conf
+
+
+{
+  "cniVersion": "0.2.0",
+  "name": "mynet",
+  "type": "bridge",
+  "bridge": "cni0",
+  "isGateway": true,
+  "ipMasq": true,
+  "ipam": {
+    "type": "host-local",
+    "subnet": "10.22.0.0/16",
+    "routes": [
+      { "dst": "0.0.0.0/0" }
+    ]
+  }
+}
+
+
+🔹 7. Explanation of Fields (Very Easy)
+Field	Meaning
+name	Network name (mynet)
+type	Plugin type (bridge)
+bridge	Bridge name (cni0)
+isGateway	Acts as gateway
+ipMasq	Enables NAT
+ipam	Manages IP addresses
+subnet	IP range
+🔹 8. Example: What Actually Happens
+👉 With above config:
+1. Container is created
+2. Bridge plugin is used
+3. Container connects to cni0
+4. Gets IP like: 10.22.0.5
+5. Can talk to:
+    * Other containers
+    * Internet
+
+🔹 9. Real-Life Analogy
+* Container = 🏠 House
+* CNI Plugin = 🛠 Road builder
+* Bridge (cni0) = 🛣 Street
+👉 When new container comes:
+* Road (network) is built
+* House connects to street
+* Now communication is possible
+
+🔹 10. Key Points for Exam / Interview
+* CNI = networking standard in Kubernetes
+* Runtime calls CNI plugin
+* Plugins stored in /opt/cni/bin
+* Config stored in /etc/cni/net.d
+* First config file is selected
+* Bridge plugin is most basic example
+* IPAM handles IP allocation
+
+
+📌 What this page is about
+This page explains how networking works in Kubernetes services — basically, how different parts (pods and services) talk to each other inside and outside a cluster. 
+
+🧠 Key Ideas
+1. Pods vs Services
+* Pods = where your app runs (they have their own IPs).
+* Services = stable way to access pods (they give a fixed IP + DNS name).
+* Instead of connecting directly to pods, you use services.
+👉 Why? Because pod IPs can change, but services stay stable.
+
+2. How Pod Networking Works
+* Each pod gets:
+    * Its own IP address
+    * Its own network namespace
+* Pods across different nodes can still talk using routes or overlay networks.
+
+3. Types of Services
+🔹 ClusterIP (default)
+* Only works inside the cluster
+* Used for internal apps like databases
+* Example: backend services
+🔹 NodePort
+* Exposes service outside the cluster
+* Opens a port on every node
+* Used for web apps or external access
+
+4. How Kubernetes Handles Traffic
+* kubelet → creates pods and sets up networking
+* kube-proxy → manages traffic routing
+👉 Important:
+* Services don’t have real network interfaces (they are virtual)
+* kube-proxy creates rules to send traffic to the right pod
+
+5. How Traffic Flows
+1. Service gets an IP (like 10.x.x.x)
+2. Pod sends request to service IP
+3. kube-proxy redirects it to the actual pod
+4. Uses iptables rules (default) to do this
+
+6. IP Ranges
+* Pods and services use different IP ranges
+* They must NOT overlap
+
+7. Example
+* Pod IP → 10.244.1.2
+* Service IP → 10.103.132.104
+👉 Traffic to service IP is automatically forwarded to the pod.
+
+🧾 Final Takeaway
+* Services act like a stable gateway to pods
+* kube-proxy ensures traffic reaches the correct pod
+* ClusterIP = internal use
+* NodePort = external access
+
+📘 Summary: DNS in Kubernetes
+This page explains how DNS works inside a Kubernetes cluster—basically how different parts (pods and services) find and talk to each other.
+
+🔹 1. Kubernetes has its own DNS
+* When you create a Kubernetes cluster, it automatically sets up a DNS server (CoreDNS).
+* This DNS helps pods and services communicate using names instead of IP addresses.
+👉 Think of it like:
+* Instead of remembering phone numbers (IP), you use contact names (DNS).
+
+🔹 2. Service DNS (Most Important)
+* When you create a Service, Kubernetes automatically creates a DNS name for it.
+* This DNS name maps to the service’s IP.
+✅ Example
+* Pod A (test pod): 10.244.1.5
+* Pod B (web pod): 10.244.2.5
+* Service: web-service → 10.107.37.188
+Now instead of using IP:
+
+curl http://web-service
+
+✔️ This works because DNS maps web-service → service IP
+👉 So pods talk using service names, not IPs.
+
+🔹 3. Namespaces affect DNS names
+* Kubernetes uses namespaces to organize resources.
+* DNS names change depending on namespace.
+✅ Examples
+If service is in same namespace:
+
+curl http://web-service
+
+If service is in another namespace (e.g., apps):
+
+curl http://web-service.apps
+
+Full DNS name (FQDN):
+
+curl http://web-service.apps.svc.cluster.local
+
+🧠 Structure:
+
+<service-name>.<namespace>.svc.cluster.local
+
+👉 Example:
+
+web-service.apps.svc.cluster.local
+
+
+🔹 4. Pod DNS (Optional feature)
+* By default, pods do NOT get DNS names
+* But if enabled, Kubernetes creates DNS using the pod IP
+✅ Example
+Pod IP:
+
+10.244.2.5
+
+Converted DNS:
+
+10-244-2-5.apps.pod.cluster.local
+
+Usage:
+
+curl http://10-244-2-5.apps.pod.cluster.local
+
+👉 Dots (.) in IP become dashes (-)
+
+🔹 5. Key Takeaways
+* Services always get DNS names ✅
+* Pods usually don’t (unless enabled) ⚠️
+* Use service names for communication (best practice)
+* Namespaces change how DNS names look
+
+🧩 Real-Life Analogy
+* Pod = Person
+* Service = Phone contact name
+* IP address = Phone number
+
+🔹 What is CoreDNS in Kubernetes?
+CoreDNS is a DNS server inside Kubernetes that helps pods and services find and talk to each other using names instead of IP addresses. 
+👉 Instead of remembering IPs like 10.244.2.5, you can use names like web-service.
+
+🔹 Why do we need it?
+* Pods are created and deleted frequently
+* Their IP addresses keep changing
+* Manually managing /etc/hosts is impossible at scale
+👉 So Kubernetes uses CoreDNS to automatically manage names. 
+
+🔹 How CoreDNS works
+1. CoreDNS runs as a pod in kube-system namespace
+2. Kubernetes creates a DNS service (usually kube-dns)
+3. Every pod is configured to use this DNS server
+Example inside a pod:
+
+cat /etc/resolv.conf
+nameserver 10.96.0.10
+
+👉 This means: “Ask CoreDNS for any name resolution.”
+
+🔹 Example: Service Communication
+Suppose you have a service called web-service
+You can access it in multiple ways:
+
+curl http://web-service
+curl http://web-service.default
+curl http://web-service.default.svc.cluster.local
+
+👉 All of these work because of DNS search settings. 
+
+🔹 DNS Naming Structure
+Full format:
+
+<service-name>.<namespace>.svc.cluster.local
+
+Example:
+
+web-service.default.svc.cluster.local
+
+👉 This is called FQDN (Fully Qualified Domain Name)
+
+🔹 Pod DNS (Important Difference)
+* Services → easy to resolve with short names
+* Pods → need full name
+Example:
+
+host 10-244-2-5.default.pod.cluster.local
+
+👉 Pod IP is converted to hostname like:
+
+10.244.2.5 → 10-244-2-5
+
+
+🔹 CoreDNS Configuration (Corefile)
+CoreDNS uses a config file called Corefile.
+It does things like:
+* Handle DNS queries
+* Connect with Kubernetes API
+* Forward unknown queries (e.g., google.com)
+* Cache results
+👉 Stored in a ConfigMap, so you can edit it easily.
+
+🔹 Key Takeaways
+* CoreDNS = central DNS system in Kubernetes
+* Eliminates manual host file management
+* Automatically updates DNS for pods & services
+* Makes communication simple using names
+
+🔹 Simple Real-Life Analogy
+Think of CoreDNS like your phone contacts:
+* Without it → You must remember phone numbers (IPs)
+* With it → You just search names (service names)
+
+🚀 Kubernetes Ingress — Simple Summary
+🔹 What is Ingress?
+Ingress is a smart router in Kubernetes that controls how external users access your apps.
+👉 Instead of using multiple ports or load balancers, Ingress gives:
+* One single entry point (IP/domain)
+* Routes traffic based on URL path or domain
+📌 Example:
+* myapp.com/wear → wear-service
+* myapp.com/watch → watch-service
+
+🔹 Why not just use Services?
+Before Ingress:
+* You use NodePort / LoadBalancer
+* Access like:http://<IP>:30000 ❌ (not user-friendly)
+With Ingress:
+* Access like:http://myapp.com/wear ✅
+📌 Key problem solved:
+* Too many load balancers = costly + complex 
+
+🔹 Basic Architecture
+￼
+￼
+￼
+6
+👉 Flow:User → Ingress → Service → Pod
+
+🔹 Important Components
+1. Ingress Controller
+* Actual engine (like NGINX)
+* Not installed by default ❗ 
+Examples:
+* NGINX
+* HAProxy
+* Traefik
+
+2. Ingress Resource
+* YAML file where you define rules
+
+🔹 Simple Example (VS Code YAML)
+✅ Single Service Routing
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: simple-ingress
+spec:
+  defaultBackend:
+    service:
+      name: wear-service
+      port:
+        number: 80
+
+👉 All traffic → wear-service
+
+✅ Path-Based Routing (MOST IMPORTANT)
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: path-ingress
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /wear
+        pathType: Prefix
+        backend:
+          service:
+            name: wear-service
+            port:
+              number: 80
+      - path: /watch
+        pathType: Prefix
+        backend:
+          service:
+            name: watch-service
+            port:
+              number: 80
+
+👉 Result:
+* /wear → wear-service
+* /watch → watch-service
+
+🔹 Visual of Path Routing
+￼
+￼
+￼
+7
+
+✅ Domain-Based Routing
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: domain-ingress
+spec:
+  rules:
+  - host: myapp.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: main-service
+            port:
+              number: 80
+
+👉 Different domains → different services
+
+🔹 Key Points (Exam / Interview)
+* Ingress = Layer 7 Load Balancer
+* Works with:
+    * HTTP / HTTPS
+* Supports:
+    * URL routing
+    * Domain routing
+    * SSL termination
+* Needs:
+    * Ingress Controller (mandatory)
+
+🔹 Real-Life Example
+Think of Ingress like:
+🏢 Mall Security Gate
+* One entrance
+* Directs people to:
+    * Food court 🍔
+    * Movies 🎬
+    * Shopping 🛍️
+
+🔹 When to Use Ingress?
+Use Ingress when:
+* Multiple services
+* Need clean URLs
+* Want HTTPS + domain routing
+* Want to reduce cloud costs
+
+✅ Final One-Line Summary
+👉 Ingress = Single entry point + smart routing for all your Kubernetes apps
+
+
+🌐 Gateway API vs Ingress (Super Simple + Real Examples)
+🧩 1. First understand the problem (Ingress)
+👉 Imagine this situation:
+You are building an online shopping website 🛒
+You have:
+* 👕 Clothes service → wear-service
+* ⌚ Watches service → watch-service
+You use Ingress to route traffic like this:
+* wear.myshop.com → clothes
+* watch.myshop.com → watches
+
+❌ Problem with Ingress
+👉 Both teams must edit the same Ingress file
+Example:
+* Team A (clothes) updates rules
+* Team B (watches) also updates
+💥 Result:
+* Conflicts
+* Mistakes
+* Hard to manage
+✔ This is called multi-team problem
+
+❌ Another problem
+Want advanced features?
+Feature	Ingress Problem
+HTTPS redirect	Needs annotations
+CORS	Different for each controller
+Traffic splitting	Complex
+TCP/UDP	Not supported directly
+👉 Example:
+* NGINX config ≠ Traefik config
+* You must learn different styles
+
+🚀 2. Gateway API (The Better Way)
+👉 Gateway API fixes all these problems.
+Think of it like:
+“Instead of one messy file → we divide work properly”
+
+🏬 3. Real-life Example (Mall Analogy)
+Imagine a shopping mall
+👇 Roles:
+Gateway API	Real life
+GatewayClass	Mall builder
+Gateway	Main entrance
+HTTPRoute	Shop directions
+🔧 4. How it works (with simple example)
+🧱 Step 1: GatewayClass (Infrastructure)
+👉 Defines which system is used
+Example:
+* Use NGINX or Envoy
+💡 Simple meaning:
+“What technology handles traffic?”
+
+🚪 Step 2: Gateway (Entry point)
+👉 Defines how users enter
+Example:
+* Port 80 → HTTP
+* Port 443 → HTTPS
+💡 Like:
+“Main door of the mall”
+
+🧭 Step 3: HTTPRoute (Routing rules)
+👉 Defines where traffic goes
+
+✅ Example:
+User opens:
+
+www.example.com/login
+
+👉 HTTPRoute says:
+* If path = /login
+* Send to → login-service
+✔ Done! 
+
+🔐 5. HTTPS (TLS) Example
+❌ Ingress way:
+* Add TLS + annotations (messy)
+
+✅ Gateway API way:
+You clearly define:
+* Port: 443
+* Protocol: HTTPS
+* Certificate: tls-secret
+💡 Simple meaning:
+“This door only allows secure traffic”
+
+🚦 6. Traffic Splitting (Very Important)
+👉 Used in real companies for safe deployment
+
+🧪 Example:
+You launch new version of app
+* Old app → app-v1
+* New app → app-v2
+
+✅ Gateway API:
+
+80% → app-v1
+20% → app-v2
+
+💡 Meaning:
+Only few users test new version first
+✔ Easy and built-in 
+
+🌍 7. CORS Example (Frontend + Backend)
+Problem:
+Frontend (React app) calls backend API
+
+❌ Ingress:
+* Different config for NGINX, Traefik
+
+✅ Gateway API:
+You simply define:
+* Allow origin: *
+* Allow methods: GET, POST
+💡 Meaning:
+“Anyone can call this API safely”
+✔ Same config works everywhere
+
+🧠 8. Why Gateway API is better
+✅ Simple reasons:
+✔ Teams don’t fight over same file✔ No controller-specific configs✔ Supports more protocols (HTTP, TCP, gRPC)✔ Built-in advanced features
+
+⚡ 9. Final Understanding (Super Easy)
+👉 Ingress = Old system
+* One file
+* Messy
+* Hard to scale
+
+👉 Gateway API = New system
+* Clean structure
+* Team-friendly
+* Powerful
+
+🎯 10. One-line summary
+Gateway API = “Divide work + simplify traffic management in Kubernetes”
+
+🔁 Quick Example Recap
+Scenario:
+User visits:
+
+www.shop.com/api
+
+👉 Flow:
+1. Gateway receives request
+2. HTTPRoute checks path /api
+3. Sends request to → api-service
+✔ Clean and simple
+
+
+**Helm-charts:**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
